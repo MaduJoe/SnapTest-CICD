@@ -104,19 +104,6 @@ tossify-qa/
 
 ---
 
-## 연락처
-
-**Jaekeun Cho**  
-📧 jaekeunv@gmail.com  
-🔗 GitHub: [github.com/yourusername](https://github.com/yourusername)
-
----
-
-## 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요. 
----
-
 ## 🧭 시스템 아키텍처 및 흐름도
 
 ```
@@ -156,3 +143,11 @@ tossify-qa/
       │
       └─▶ OpenAI API 호출 (자동 테스트케이스 생성 등)
 ```
+
+## 연락처
+
+**Jaekeun Cho**  
+📧 jaekeunv@gmail.com  
+🔗 GitHub: [github.com/yourusername](https://github.com/yourusername)
+
+---
