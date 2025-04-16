@@ -1,0 +1,15 @@
+scripts/
+*.pdf
+*.docx
+*.doc
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+*.txt
+*.csv
+*.json
+*.xml
+*.yaml
+*.yml
+*.db

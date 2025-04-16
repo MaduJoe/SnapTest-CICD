@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Reports</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body class="container py-5">
+    <h1 class="mb-4">📄 Test Reports</h1>
+
+    <!-- 정렬 버튼 -->
+    <div class="mb-4">
+        <a href="/reports?order=desc" class="btn btn-outline-primary btn-sm {% if sort_order == 'desc' %}active{% endif %}">최신순 🔽</a>
+        <a href="/reports?order=asc" class="btn btn-outline-primary btn-sm {% if sort_order == 'asc' %}active{% endif %}">오래된순 🔼</a>
+    </div>
+
+    <!-- 1열 리스트로 정렬 -->
+    <div class="row row-cols-1 g-4">
+        {% for report in reports %}
+        
+        <div class="col">
+            <!-- <div class="card border-{{ 'danger' if report.status == 'FAIL' else 'success' }}" > -->
+            <div class="card card-thick-border border-{{ 'danger' if report.status == 'FAIL' else 'success' }}">
+
+                <div class="card-header fw-bold">
+                    {{ report.test_case }} — <span class="text-muted">{{ report.status }}</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ report.description }}</p>
+                    {% if report.error %}
+                        <pre class="text-danger">{{ report.error }}</pre>
+                        <pre>{{ report.traceback }}</pre>
+                    {% else %}
+                        <pre>{{ report.output }}</pre>
+                    {% endif %}
+                    {% if report.log %}
+                    <details>
+                        <summary>🔍 View Logs</summary>
+                        <pre>{{ report.log }}</pre>
+                    </details>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-muted">
+                    {{ report.timestamp }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    
+    <a href="/" class="btn btn-secondary mt-4">← Back to Home</a>
+</body>
+</html>

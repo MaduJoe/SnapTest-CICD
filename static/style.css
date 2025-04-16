@@ -1,0 +1,6 @@
+.card-thick-border {
+    border-width: 3px !important;
+}
+.active {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);  /* Bootstrap 스타일 */
+  }
