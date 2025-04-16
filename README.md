@@ -183,4 +183,8 @@ Runner와 Web UI를 분리 → 테스트 수행이 UI 반응성과 무관하게 
 ## 📞 연락처
 
 **Jaekeun Cho**  
+<<<<<<< HEAD
 jaekeunv@gmail.com 
+=======
+jaekeunv@gmail.com 
+>>>>>>> 5606cb9ddd6669953070b91acbbe4ba02dde9fcc
