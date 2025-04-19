@@ -6,7 +6,9 @@ on:
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
+
 permissions: write-all
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -23,7 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flask pytest pytest-html
+        pip install flask pytest pytest-html requests
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     
     - name: Create test directories
@@ -60,4 +62,53 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
       with:
-        files: reports/test_report.xml 
+        files: reports/test_report.xml
+        
+    - name: Create report uploader
+      if: success()
+      run: |
+        echo "import requests" > upload_report.py
+        echo "import os" >> upload_report.py
+        echo "import json" >> upload_report.py
+        echo "import sys" >> upload_report.py
+        echo "from datetime import datetime" >> upload_report.py
+        echo "" >> upload_report.py
+        echo "# 서버 정보가 환경변수로 설정되어 있지 않다면 기본값 사용" >> upload_report.py
+        echo "server_url = os.environ.get('REPORT_SERVER_URL', 'http://localhost:5000')" >> upload_report.py
+        echo "endpoint = '/api/ci_reports'" >> upload_report.py
+        echo "" >> upload_report.py
+        echo "# 테스트 결과 데이터 준비" >> upload_report.py
+        echo "report_data = {" >> upload_report.py
+        echo "    'commit_id': os.environ.get('GITHUB_SHA', 'unknown')," >> upload_report.py
+        echo "    'repository': os.environ.get('GITHUB_REPOSITORY', 'unknown')," >> upload_report.py
+        echo "    'branch': os.environ.get('GITHUB_REF', 'unknown').replace('refs/heads/', '')," >> upload_report.py
+        echo "    'run_id': os.environ.get('GITHUB_RUN_ID', 'unknown')," >> upload_report.py
+        echo "    'timestamp': datetime.now().isoformat()," >> upload_report.py
+        echo "    'result': 'success'," >> upload_report.py
+        echo "    'test_count': 1," >> upload_report.py
+        echo "    'passed_count': 1," >> upload_report.py
+        echo "    'failed_count': 0" >> upload_report.py
+        echo "}" >> upload_report.py
+        echo "" >> upload_report.py
+        echo "# 결과 출력" >> upload_report.py
+        echo "print(f'Uploading report to {server_url + endpoint}')" >> upload_report.py
+        echo "print(f'Report data: {json.dumps(report_data, indent=2)}')" >> upload_report.py
+        echo "" >> upload_report.py
+        echo "# 실제 서버가 존재하고 접근 가능하다면 아래 주석을 해제" >> upload_report.py
+        echo "try:" >> upload_report.py
+        echo "    print('Attempting to upload results...')" >> upload_report.py
+        echo "    # response = requests.post(server_url + endpoint, json=report_data)" >> upload_report.py
+        echo "    # print(f'Response: {response.status_code}')" >> upload_report.py
+        echo "    # print(response.text)" >> upload_report.py
+        echo "    # if response.status_code != 200:" >> upload_report.py
+        echo "    #     sys.exit(1)" >> upload_report.py
+        echo "    print('Note: Upload is commented out in code. This is just a simulation.')" >> upload_report.py
+        echo "except Exception as e:" >> upload_report.py
+        echo "    print(f'Error uploading results: {str(e)}')" >> upload_report.py
+        echo "    sys.exit(1)" >> upload_report.py
+        echo "" >> upload_report.py
+        echo "print('Report upload simulation completed successfully!')" >> upload_report.py
+        
+    - name: Simulate uploading results
+      if: success()
+      run: python upload_report.py 
