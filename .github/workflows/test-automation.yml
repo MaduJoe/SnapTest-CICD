@@ -32,7 +32,7 @@ jobs:
         touch tests/__init__.py
         
         # Create basic test functions 
-        cat > tests/functions.py << 'EOF'
+        cat > tests/functions.py << EOF
 def add_test(a, b, expected=None):
     """
     두 숫자를 더하는 테스트
