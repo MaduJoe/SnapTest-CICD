@@ -106,4 +106,4 @@ GitHub Actions CI/CD 파이프라인 통합으로 다음과 같은 QA 프로세�
 
 ---
 
-© 2023 Jaekeun Cho (jaekeunv@gmail.com)
+© 2025 Jaekeun Cho (jaekeunv@gmail.com)
