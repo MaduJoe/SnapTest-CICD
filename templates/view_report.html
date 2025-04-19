@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>테스트 리포트 상세보기</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --success-color: #2ecc71;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --dark-color: #2c3e50;
+      --light-color: #ecf0f1;
+    }
+    
+    body {
+      background-color: #f9f9f9;
+      color: var(--dark-color);
+    }
+    
+    .container {
+      max-width: 1000px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      padding: 30px;
+    }
+    
+    .log-block {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+      font-size: 0.9rem;
+      color: #333;
+    }
+    
+    .status-badge {
+      font-size: 1.2rem;
+      padding: 0.5em 1.2em;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .card {
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+      border: none;
+    }
+    
+    .card-header {
+      padding: 15px 20px;
+      font-weight: bold;
+      border-radius: 8px 8px 0 0 !important;
+    }
+    
+    .bg-primary-dark {
+      background-color: var(--dark-color);
+      color: white;
+    }
+    
+    .btn {
+      border-radius: 6px;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-primary:hover {
+      background-color: #2980b9;
+      border-color: #2980b9;
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+      border-color: var(--danger-color);
+    }
+    
+    .btn-danger:hover {
+      background-color: #c0392b;
+      border-color: #c0392b;
+    }
+    
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin: 5px;
+      min-width: 120px;
+    }
+    
+    .report-heading {
+      position: relative;
+      padding-left: 15px;
+      border-bottom: 2px solid var(--light-color);
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .report-heading::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      height: calc(100% - 20px);
+      width: 5px;
+      background-color: var(--primary-color);
+      border-radius: 3px;
+    }
+    
+    .info-row {
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .info-label {
+      font-weight: 600;
+      color: #666;
+    }
+    
+    .section-title {
+      margin-top: 30px;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<div class="container py-5">
+
+  <h1 class="report-heading">
+    <i class="fas fa-clipboard-check me-2"></i>
+    테스트 리포트 상세보기
+    <span class="badge status-badge float-end {% if report.status == 'PASS' %}bg-success{% else %}bg-danger{% endif %}">
+      <i class="fas {% if report.status == 'PASS' %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+      {{ report.status }}
+    </span>
+  </h1>
+
+  <div class="card">
+    <div class="card-header bg-primary-dark">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="mb-0 card-title">{{ report.test_case }}</h3>
+        <span class="text-light">ID: {{ report.id }}</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row info-row">
+        <div class="col-md-3">
+          <span class="info-label"><i class="fas fa-info-circle me-2"></i> 설명:</span>
+        </div>
+        <div class="col-md-9">
+          {{ report.description }}
+        </div>
+      </div>
+      
+      <div class="row info-row">
+        <div class="col-md-3">
+          <span class="info-label"><i class="fas fa-calendar-alt me-2"></i> 실행 일시:</span>
+        </div>
+        <div class="col-md-9">
+          {{ report.timestamp }}
+        </div>
+      </div>
+      
+      <div class="row info-row">
+        <div class="col-md-3">
+          <span class="info-label"><i class="fas fa-stopwatch me-2"></i> 소요 시간:</span>
+        </div>
+        <div class="col-md-9">
+          {{ report.duration }} 초
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if report.output %}
+  <h4 class="section-title"><i class="fas fa-terminal me-2"></i> 결과 출력</h4>
+  <div class="card">
+    <div class="card-body">
+      <div class="log-block">{{ report.output }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if report.error %}
+  <h4 class="section-title"><i class="fas fa-exclamation-triangle me-2"></i> 오류</h4>
+  <div class="card">
+    <div class="card-header bg-danger text-white">
+      <i class="fas fa-bug me-2"></i> 오류 정보
+    </div>
+    <div class="card-body">
+      <div class="log-block">{{ report.error }}</div>
+      {% if report.traceback %}
+      <h5 class="mt-4 mb-2"><i class="fas fa-stream me-2"></i> 스택 트레이스:</h5>
+      <div class="log-block">{{ report.traceback }}</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if report.log %}
+  <h4 class="section-title"><i class="fas fa-list-alt me-2"></i> 로그</h4>
+  <div class="card">
+    <div class="card-header bg-secondary text-white">
+      <i class="fas fa-file-alt me-2"></i> 실행 로그
+    </div>
+    <div class="card-body">
+      <div class="log-block">{{ report.log }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="d-flex justify-content-center mt-4 gap-2">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary action-btn">
+      <i class="fas fa-chart-line me-1"></i> 대시보드
+    </a>
+    <form method="post" action="{{ url_for('delete_report', report_id=report.id) }}" style="display:inline;">
+      <button type="submit" class="btn btn-danger action-btn" onclick="return confirm('정말 삭제하시겠습니까?')">
+        <i class="fas fa-trash me-1"></i> 삭제
+      </button>
+    </form>
+  </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

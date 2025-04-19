@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CI/CD Test Report Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .header {
+            border-bottom: 2px solid var(--light-color);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+        }
+        
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0 !important;
+            padding: 15px 20px;
+        }
+        
+        .summary-card {
+            margin-bottom: 30px;
+        }
+        
+        .summary-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            flex: 1;
+            min-width: 180px;
+            padding: 20px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+        
+        .stat-box-blue {
+            background-color: #3498db;
+        }
+        
+        .stat-box-green {
+            background-color: #2ecc71;
+        }
+        
+        .stat-box-red {
+            background-color: #e74c3c;
+        }
+        
+        .stat-box-yellow {
+            background-color: #f39c12;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .test-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .test-item:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .test-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .test-name {
+            font-weight: 600;
+        }
+        
+        .test-function {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        .test-details {
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .badge-pass {
+            background-color: #2ecc71;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        .badge-fail {
+            background-color: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        .meta-info {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .meta-item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .meta-label {
+            min-width: 150px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .run-info {
+            margin-bottom: 30px;
+        }
+        
+        .ci-badge {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .badge-github {
+            background-color: #24292e;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-clipboard-check me-2"></i>테스트 실행 상세 결과 <span class="ci-badge badge-github"><i class="fab fa-github me-1"></i>GitHub Actions</span></h1>
+            <p class="text-muted">테스트 실행 #{{ report.id }} 상세 결과</p>
+        </div>
+
+        <div class="run-info">
+            <div class="meta-info">
+                <div class="meta-item">
+                    <div class="meta-label"><i class="fas fa-calendar-alt me-2"></i>실행 시간:</div>
+                    <div>{{ report.timestamp }}</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label"><i class="fas fa-code-branch me-2"></i>Git 브랜치:</div>
+                    <div>{{ report.branch|default('master', true) }}</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label"><i class="fas fa-code-commit me-2"></i>커밋:</div>
+                    <div>{{ report.commit_hash|default('N/A', true) }}</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label"><i class="fas fa-user me-2"></i>실행자:</div>
+                    <div>{{ report.triggered_by|default('GitHub Actions', true) }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="summary-card">
+            <h3><i class="fas fa-chart-pie me-2"></i>요약</h3>
+            <div class="summary-stats">
+                <div class="stat-box stat-box-blue">
+                    <div class="stat-number">{{ report.total_tests }}</div>
+                    <div class="stat-label">전체 테스트</div>
+                </div>
+                <div class="stat-box stat-box-green">
+                    <div class="stat-number">{{ report.pass_count }}</div>
+                    <div class="stat-label">통과</div>
+                </div>
+                <div class="stat-box stat-box-red">
+                    <div class="stat-number">{{ report.fail_count }}</div>
+                    <div class="stat-label">실패</div>
+                </div>
+                <div class="stat-box {% if report.success_rate >= 90 %}stat-box-green{% elif report.success_rate >= 70 %}stat-box-yellow{% else %}stat-box-red{% endif %}">
+                    <div class="stat-number">{{ report.success_rate }}%</div>
+                    <div class="stat-label">성공률</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-list-check me-2"></i> 테스트 케이스 결과
+            </div>
+            <div class="card-body p-0">
+                {% for test in report.test_results %}
+                <div class="test-item">
+                    <div class="test-title">
+                        <span class="test-name">{{ test.name }}</span>
+                        <span class="badge {% if test.status == 'PASS' %}badge-pass{% else %}badge-fail{% endif %}">
+                            <i class="fas {% if test.status == 'PASS' %}fa-check{% else %}fa-times{% endif %} me-1"></i>
+                            {{ test.status }}
+                        </span>
+                    </div>
+                    <div class="test-function">
+                        <i class="fas fa-code me-1"></i> {{ test.function }}
+                    </div>
+                    {% if test.details %}
+                    <div class="test-details">
+                        <strong>결과:</strong> {{ test.details }}
+                    </div>
+                    {% endif %}
+                    {% if test.error %}
+                    <div class="test-details text-danger">
+                        <strong>오류:</strong> {{ test.error }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="{{ url_for('ci_reports') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> 모든 보고서 목록으로
+            </a>
+            {% if report.workflow_run_url %}
+            <a href="{{ report.workflow_run_url }}" target="_blank" class="btn btn-outline-dark ms-2">
+                <i class="fab fa-github me-1"></i> GitHub Actions에서 보기
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

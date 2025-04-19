@@ -268,7 +268,40 @@
     </div>
   </div>
 
-  
+  <!-- 검색 및 필터 -->
+  <div class="filter-control d-none d-md-block" id="filter-controls">
+    <div class="row align-items-center">
+      <div class="col-md-5">
+        <div class="input-group">
+          <input type="text" class="form-control search-input" id="search-input" placeholder="🔍 테스트 이름 또는 설명 검색" value="{{ keyword or '' }}">
+          <button class="btn search-btn" id="search-btn"><i class="fas fa-search"></i> 검색</button>
+        </div>
+      </div>
+      <div class="col-md-7 text-end">
+        <div class="btn-group me-2" role="group">
+          <button type="button" class="btn filter-btn {% if status_filter == 'PASS' %}btn-success{% else %}btn-outline-success{% endif %}" data-filter="PASS">
+            <i class="fas fa-check-circle me-1"></i> PASS
+          </button>
+          <button type="button" class="btn filter-btn {% if status_filter == 'FAIL' %}btn-danger{% else %}btn-outline-danger{% endif %}" data-filter="FAIL">
+            <i class="fas fa-times-circle me-1"></i> FAIL
+          </button>
+          <button type="button" class="btn filter-btn {% if not status_filter %}btn-dark{% else %}btn-outline-dark{% endif %}" data-filter="">
+            <i class="fas fa-list me-1"></i> 전체
+          </button>
+        </div>
+
+        <div class="btn-group" role="group">
+          <button type="button" class="btn sort-btn {% if sort_order == 'desc' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-sort="desc">
+            <i class="fas fa-sort-amount-down me-1"></i> 최신순
+          </button>
+          <button type="button" class="btn sort-btn {% if sort_order == 'asc' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-sort="asc">
+            <i class="fas fa-sort-amount-up me-1"></i> 오래된순
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 테스트 성공률 통계 -->
   <div class="card">
     <div class="card-header">
@@ -310,41 +343,6 @@
     </div>
   </div>
 
-  <!-- 검색 및 필터 -->
-  <div class="filter-control d-none d-md-block" id="filter-controls">
-    <div class="row align-items-center">
-      <div class="col-md-5">
-        <div class="input-group">
-          <input type="text" class="form-control search-input" id="search-input" placeholder="🔍 테스트 이름 또는 설명 검색" value="{{ keyword or '' }}">
-          <button class="btn search-btn" id="search-btn"><i class="fas fa-search"></i> 검색</button>
-        </div>
-      </div>
-      <div class="col-md-7 text-end">
-        <div class="btn-group me-2" role="group">
-          <button type="button" class="btn filter-btn {% if status_filter == 'PASS' %}btn-success{% else %}btn-outline-success{% endif %}" data-filter="PASS">
-            <i class="fas fa-check-circle me-1"></i> PASS
-          </button>
-          <button type="button" class="btn filter-btn {% if status_filter == 'FAIL' %}btn-danger{% else %}btn-outline-danger{% endif %}" data-filter="FAIL">
-            <i class="fas fa-times-circle me-1"></i> FAIL
-          </button>
-          <button type="button" class="btn filter-btn {% if not status_filter %}btn-dark{% else %}btn-outline-dark{% endif %}" data-filter="">
-            <i class="fas fa-list me-1"></i> 전체
-          </button>
-        </div>
-
-        <div class="btn-group" role="group">
-          <button type="button" class="btn sort-btn {% if sort_order == 'desc' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-sort="desc">
-            <i class="fas fa-sort-amount-down me-1"></i> 최신순
-          </button>
-          <button type="button" class="btn sort-btn {% if sort_order == 'asc' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-sort="asc">
-            <i class="fas fa-sort-amount-up me-1"></i> 오래된순
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  
   <!-- 최근 실행 결과 -->
   <div id="reports-container" class="card mt-4 position-relative">
     <div class="card-header">

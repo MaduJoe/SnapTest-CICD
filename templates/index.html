@@ -1,33 +1,774 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html>
 <head>
     <title>TOSSIFY QA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+        }
+        
+        .dashboard-header {
+            border-bottom: 2px solid var(--light-color);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+        }
+        
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0 !important;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-sm {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+        
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin: 2px;
+        }
+        
+        .testcase-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .testcase-item:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .testcase-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .testcase-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .group-header {
+            background-color: var(--light-color);
+            padding: 10px 15px;
+            font-weight: 600;
+            color: var(--dark-color);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .group-header:hover {
+            background-color: #dde4e7;
+        }
+        
+        .group-select {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            margin-right: 0.5rem;
+            z-index: 10;
+        }
+        
+        .group-select:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .search-box {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .search-box input {
+            border-radius: 30px;
+            padding-left: 40px;
+            border: 1px solid #ddd;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            color: #999;
+        }
+        
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: space-between;
+        }
+        
+        .no-cases {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+        }
+        
+        .collapse-icon {
+            transition: transform 0.3s;
+        }
+        
+        .collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .badge-count {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2em 0.6em;
+            border-radius: 10px;
+            margin-left: 10px;
+        }
+        
+        /* 그룹 색상 */
+        .group-math { border-left: 4px solid #3498db; }
+        .group-string { border-left: 4px solid #2ecc71; }
+        .group-notification { border-left: 4px solid #e74c3c; }
+        .group-login { border-left: 4px solid #f39c12; }
+        .group-payment { border-left: 4px solid #9b59b6; }
+        .group-error { border-left: 4px solid #e67e22; }
+        .group-other { border-left: 4px solid #95a5a6; }
+    </style>
 </head>
-<body class="container py-5">
+<body>
+<div class="container py-5">
 
-    <h1 class="mb-4">🧪 Test Cases</h1>
+    <div class="dashboard-header">
+        <h1 class="mb-3"><i class="fas fa-vial me-2"></i> Test Cases</h1>
+        <p class="text-muted">테스트 케이스를 선택하여 실행하고 결과를 확인할 수 있습니다.</p>
+    </div>
 
-    <form method="post" action="/run">
-        <div class="list-group mb-3">
-            {% for case in cases %}
-            <label class="list-group-item">
-                <input class="form-check-input me-1" type="checkbox" name="selected_cases" value="{{ case.filename }}">
-                <strong>{{ case.name }}</strong> — {{ case.description }}
-                <a href="{{ url_for('edit_case', filename=case.filename) }}" class="btn btn-sm btn-outline-secondary">✏️ 수정</a>
-            </label>
-
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="action-bar">
+        <div class="left-actions">
+            <a href="{{ url_for('add_case') }}" class="btn btn-success">
+                <i class="fas fa-plus-circle me-1"></i> 테스트 케이스 등록
+            </a>
+            
+            {% if gemini_enabled %}
+            <a href="{{ url_for('generate_case_with_ai') }}" class="btn btn-primary">
+                <i class="fas fa-robot me-1"></i> AI로 생성
+            </a>
+            {% else %}
+            <button class="btn btn-secondary" disabled title="Gemini API 키가 설정되지 않았습니다">
+                <i class="fas fa-robot me-1"></i> AI로 생성 (비활성화됨)
+            </button>
+            {% endif %}
         </div>
-        <button type="submit" class="btn btn-primary">▶ Run Selected</button>
+        
+        <div class="right-actions">
+            <a href="{{ url_for('ci_reports') }}" class="btn btn-outline-info me-2">
+                <i class="fas fa-cogs me-1"></i> CI/CD 보고서
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                <i class="fas fa-chart-line me-1"></i> 대시보드
+            </a>
+        </div>
+    </div>
+
+    <div class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="searchBox" class="form-control" placeholder="테스트 케이스 검색...">
+    </div>
+
+    {% if cases %}
+    <form method="post" action="/run" id="runForm">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <i class="fas fa-list me-2"></i> 테스트 케이스 목록
+                    <span class="badge bg-secondary">{{ cases|length }}개</span>
+                </div>
+                <div>
+                    <button type="button" id="toggleAllGroups" class="btn btn-sm btn-light">
+                        <i class="fas fa-expand-alt me-1"></i> 모두 펼치기
+                    </button>
+                    <button type="button" id="selectAll" class="btn btn-sm btn-light">
+                        <i class="fas fa-check-square me-1"></i> 모두 선택
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <!-- 원본 테스트 케이스 목록 (그룹화 전) -->
+                <div id="originalCasesList">
+                    {% for case in cases %}
+                    <div class="test-case-item testcase-item">
+                        <div class="testcase-info">
+                            <input type="checkbox" name="selected_cases" value="{{ case.filename }}" id="case-{{ loop.index }}" class="form-check-input">
+                            <label for="case-{{ loop.index }}" class="ms-2">
+                                <span class="test-name fw-bold">{{ case.name }}</span>
+                                <span class="text-muted d-block small">
+                                    <span class="test-function">{{ case.test_function }}</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="testcase-actions">
+                            <a href="{{ url_for('edit_case', filename=case.filename) }}" class="btn btn-sm btn-outline-primary action-btn">
+                                <i class="fas fa-edit"></i> 수정
+                            </a>
+                            <a href="{{ url_for('delete_case', filename=case.filename) }}" class="btn btn-sm btn-outline-danger action-btn" onclick="return confirm('정말로 이 테스트 케이스를 삭제하시겠습니까?')">
+                                <i class="fas fa-trash"></i> 삭제
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- 수학 연산 그룹 -->
+                <div class="test-group">
+                    <div class="group-header group-math">
+                        <div class="d-flex align-items-center flex-grow-1" data-bs-toggle="collapse" data-bs-target="#mathGroup">
+                            <i class="fas fa-calculator me-2"></i> 수학 연산 테스트
+                            <span class="badge-count math-count">0</span>
+                            <i class="fas fa-chevron-down collapse-icon ms-2"></i>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-light group-select" data-group="math">
+                                <i class="fas fa-check-square me-1"></i> 선택
+                            </button>
+                        </div>
+                    </div>
+                    <div id="mathGroup" class="collapse show">
+                        <div class="test-cases math-group">
+                            <!-- 여기에 해당 그룹의 테스트 케이스가 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 문자열 그룹 -->
+                <div class="test-group">
+                    <div class="group-header group-string">
+                        <div class="d-flex align-items-center flex-grow-1" data-bs-toggle="collapse" data-bs-target="#stringGroup">
+                            <i class="fas fa-font me-2"></i> 문자열 테스트
+                            <span class="badge-count string-count">0</span>
+                            <i class="fas fa-chevron-down collapse-icon ms-2"></i>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-light group-select" data-group="string">
+                                <i class="fas fa-check-square me-1"></i> 선택
+                            </button>
+                        </div>
+                    </div>
+                    <div id="stringGroup" class="collapse show">
+                        <div class="test-cases string-group">
+                            <!-- 여기에 해당 그룹의 테스트 케이스가 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 알림 그룹 -->
+                <div class="test-group">
+                    <div class="group-header group-notification">
+                        <div class="d-flex align-items-center flex-grow-1" data-bs-toggle="collapse" data-bs-target="#notificationGroup">
+                            <i class="fas fa-bell me-2"></i> 알림 테스트
+                            <span class="badge-count notification-count">0</span>
+                            <i class="fas fa-chevron-down collapse-icon ms-2"></i>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-light group-select" data-group="notification">
+                                <i class="fas fa-check-square me-1"></i> 선택
+                            </button>
+                        </div>
+                    </div>
+                    <div id="notificationGroup" class="collapse show">
+                        <div class="test-cases notification-group">
+                            <!-- 여기에 해당 그룹의 테스트 케이스가 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 로그인 그룹 -->
+                <div class="test-group">
+                    <div class="group-header group-login">
+                        <div class="d-flex align-items-center flex-grow-1" data-bs-toggle="collapse" data-bs-target="#loginGroup">
+                            <i class="fas fa-user-shield me-2"></i> 로그인 테스트
+                            <span class="badge-count login-count">0</span>
+                            <i class="fas fa-chevron-down collapse-icon ms-2"></i>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-light group-select" data-group="login">
+                                <i class="fas fa-check-square me-1"></i> 선택
+                            </button>
+                        </div>
+                    </div>
+                    <div id="loginGroup" class="collapse show">
+                        <div class="test-cases login-group">
+                            <!-- 여기에 해당 그룹의 테스트 케이스가 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 결제 그룹 -->
+                <div class="test-group">
+                    <div class="group-header group-payment">
+                        <div class="d-flex align-items-center flex-grow-1" data-bs-toggle="collapse" data-bs-target="#paymentGroup">
+                            <i class="fas fa-credit-card me-2"></i> 결제 테스트
+                            <span class="badge-count payment-count">0</span>
+                            <i class="fas fa-chevron-down collapse-icon ms-2"></i>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-light group-select" data-group="payment">
+                                <i class="fas fa-check-square me-1"></i> 선택
+                            </button>
+                        </div>
+                    </div>
+                    <div id="paymentGroup" class="collapse show">
+                        <div class="test-cases payment-group">
+                            <!-- 여기에 해당 그룹의 테스트 케이스가 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 오류 테스트 그룹 -->
+                <div class="test-group">
+                    <div class="group-header group-error">
+                        <div class="d-flex align-items-center flex-grow-1" data-bs-toggle="collapse" data-bs-target="#errorGroup">
+                            <i class="fas fa-exclamation-triangle me-2"></i> 오류 테스트
+                            <span class="badge-count error-count">0</span>
+                            <i class="fas fa-chevron-down collapse-icon ms-2"></i>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-light group-select" data-group="error">
+                                <i class="fas fa-check-square me-1"></i> 선택
+                            </button>
+                        </div>
+                    </div>
+                    <div id="errorGroup" class="collapse show">
+                        <div class="test-cases error-group">
+                            <!-- 여기에 해당 그룹의 테스트 케이스가 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 기타 그룹 -->
+                <div class="test-group">
+                    <div class="group-header group-other">
+                        <div class="d-flex align-items-center flex-grow-1" data-bs-toggle="collapse" data-bs-target="#otherGroup">
+                            <i class="fas fa-puzzle-piece me-2"></i> 기타 테스트
+                            <span class="badge-count other-count">0</span>
+                            <i class="fas fa-chevron-down collapse-icon ms-2"></i>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-light group-select" data-group="other">
+                                <i class="fas fa-check-square me-1"></i> 선택
+                            </button>
+                        </div>
+                    </div>
+                    <div id="otherGroup" class="collapse show">
+                        <div class="test-cases other-group">
+                            <!-- 여기에 해당 그룹의 테스트 케이스가 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-play me-1"></i> 선택 항목 실행
+                    <span id="selectedCount" class="badge bg-light text-dark ms-1">0개</span>
+                </button>
+            </div>
+        </div>
     </form>
+    {% else %}
+    <div class="card">
+        <div class="card-body no-cases">
+            <i class="fas fa-info-circle fa-3x mb-3"></i>
+            <h4>테스트 케이스가 없습니다</h4>
+            <p>새 테스트 케이스를 추가해보세요.</p>
+            <a href="{{ url_for('add_case') }}" class="btn btn-primary mt-2">
+                <i class="fas fa-plus-circle me-1"></i> 테스트 케이스 추가
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
 
-    <a href="/dashboard" class="btn btn-outline-secondary mt-3">📊 View Dashboard</a>
-    <a href="/add_case" class="btn btn-outline-success mt-3">📦 테스트 케이스 등록</a>
-    <a href="{{ url_for('generate_case_with_ai') }}" class="btn btn-outline-success mt-3">
-        🤖 AI로 테스트 케이스 생성
-      </a>
+<script>
+// 디버깅을 위한 로그 함수
+function log(message) {
+    console.log(`[DEBUG] ${message}`);
+}
 
+// 그룹화 함수: 테스트 케이스를 카테고리별로 분류
+function groupTestCases() {
+    log("groupTestCases 함수 시작");
+    
+    // 원래 테스트 케이스 목록 요소
+    const originalCases = document.querySelectorAll('.test-case-item');
+    log(`원본 테스트 케이스 개수: ${originalCases.length}`);
+    
+    if (originalCases.length === 0) {
+        log("테스트 케이스가 없습니다. 그룹화를 중단합니다.");
+        return;
+    }
+    
+    // 그룹별 카운터 초기화
+    const counters = {
+        math: 0,
+        string: 0,
+        notification: 0,
+        login: 0,
+        payment: 0,
+        error: 0,
+        other: 0
+    };
+    
+    // 각 테스트 케이스를 적절한 그룹으로 이동
+    originalCases.forEach((caseItem, index) => {
+        // 테스트 함수 이름 가져오기
+        const functionElement = caseItem.querySelector('.test-function');
+        if (!functionElement) {
+            log(`테스트 케이스 #${index}에서 .test-function 요소를 찾을 수 없습니다.`);
+            return;
+        }
+        
+        const functionName = functionElement.textContent.trim();
+        log(`테스트 케이스 #${index} 함수 이름: ${functionName}`);
+        
+        let group = 'other';
+        
+        // 테스트 함수 이름에 따라 그룹 결정
+        if (functionName.includes('add') || functionName.includes('multiply') || 
+            functionName.includes('divide') || functionName.includes('subtract') || 
+            functionName.includes('calculate')) {
+            group = 'math';
+        } else if (functionName.includes('string') || functionName.includes('text') || 
+                   functionName.includes('concat') || functionName.includes('format')) {
+            group = 'string';
+        } else if (functionName.includes('notification') || functionName.includes('alert') || 
+                   functionName.includes('message')) {
+            group = 'notification';
+        } else if (functionName.includes('login') || functionName.includes('auth') || 
+                   functionName.includes('user')) {
+            group = 'login';
+        } else if (functionName.includes('payment') || functionName.includes('pay') || 
+                   functionName.includes('charge')) {
+            group = 'payment';
+        } else if (functionName.includes('error') || functionName.includes('fail') || 
+                   functionName.includes('exception')) {
+            group = 'error';
+        }
+        
+        log(`테스트 케이스 #${index} 그룹: ${group}`);
+        
+        // 선택된 그룹에 테스트 케이스 추가
+        const groupContainer = document.querySelector(`.${group}-group`);
+        if (groupContainer) {
+            groupContainer.appendChild(caseItem.cloneNode(true));
+            counters[group]++;
+            log(`테스트 케이스 #${index}를 ${group} 그룹에 추가했습니다.`);
+        } else {
+            log(`${group} 그룹 컨테이너를 찾을 수 없습니다.`);
+        }
+    });
+    
+    // 각 그룹의 카운터 업데이트
+    for (const [group, count] of Object.entries(counters)) {
+        const countElement = document.querySelector(`.${group}-count`);
+        if (countElement) {
+            countElement.textContent = count;
+            log(`${group} 그룹 카운터 업데이트: ${count}`);
+        }
+        
+        // 빈 그룹 숨기기
+        const groupElement = document.querySelector(`.group-${group}`).closest('.test-group');
+        if (count === 0 && groupElement) {
+            groupElement.style.display = 'none';
+            log(`${group} 그룹이 비어있어 숨깁니다.`);
+        }
+    }
+    
+    // 원래 테스트 케이스 목록 숨기기
+    const originalList = document.getElementById('originalCasesList');
+    if (originalList) {
+        // 디버깅 완료했으므로 원본 목록을 숨깁니다
+        originalList.style.display = 'none';
+        log("원본 테스트 케이스 목록을 숨깁니다.");
+    } else {
+        log("originalCasesList 요소를 찾을 수 없습니다.");
+    }
+    
+    log("groupTestCases 함수 완료");
+}
+
+// 검색 기능
+function setupSearch() {
+    const searchBox = document.getElementById('searchBox');
+    if (!searchBox) return;
+    
+    searchBox.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const testCases = document.querySelectorAll('.test-case-item');
+        
+        testCases.forEach(caseItem => {
+            const testName = caseItem.querySelector('.test-name').textContent.toLowerCase();
+            const testFunction = caseItem.querySelector('.test-function').textContent.toLowerCase();
+            const isMatch = testName.includes(searchTerm) || testFunction.includes(searchTerm);
+            
+            caseItem.style.display = isMatch ? '' : 'none';
+        });
+        
+        // 그룹의 가시성 업데이트
+        updateGroupVisibility();
+    });
+}
+
+// 그룹 가시성 업데이트
+function updateGroupVisibility() {
+    const groups = ['math', 'string', 'notification', 'login', 'payment', 'error', 'other'];
+    
+    groups.forEach(group => {
+        const groupContainer = document.querySelector(`.${group}-group`);
+        const groupHeader = document.querySelector(`.group-${group}`).closest('.test-group');
+        
+        if (groupContainer) {
+            const visibleItems = groupContainer.querySelectorAll('.test-case-item[style="display: none;"]').length;
+            const totalItems = groupContainer.querySelectorAll('.test-case-item').length;
+            
+            groupHeader.style.display = (totalItems === 0 || totalItems === visibleItems) ? 'none' : '';
+        }
+    });
+}
+
+// 모든 그룹 토글
+function setupGroupToggle() {
+    const toggleButton = document.getElementById('toggleAllGroups');
+    if (!toggleButton) return;
+    
+    let expanded = true;
+    
+    toggleButton.addEventListener('click', function() {
+        const groups = document.querySelectorAll('.collapse');
+        
+        groups.forEach(group => {
+            if (expanded) {
+                // 이미 존재하는 Bootstrap Collapse 인스턴스가 없을 수 있으므로 직접 처리
+                if (group.classList.contains('show')) {
+                    new bootstrap.Collapse(group).hide();
+                }
+            } else {
+                // 이미 존재하는 Bootstrap Collapse 인스턴스가 없을 수 있으므로 직접 처리
+                if (!group.classList.contains('show')) {
+                    new bootstrap.Collapse(group).show();
+                }
+            }
+        });
+        
+        expanded = !expanded;
+        this.innerHTML = expanded ? 
+            '<i class="fas fa-compress-alt me-1"></i> 모두 접기' : 
+            '<i class="fas fa-expand-alt me-1"></i> 모두 펼치기';
+    });
+}
+
+// 선택된 테스트 케이스 개수 업데이트
+function updateSelectedCount() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][name="selected_cases"]');
+    const selectedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+    
+    const countElement = document.getElementById('selectedCount');
+    if (countElement) {
+        countElement.textContent = `${selectedCount}개`;
+        
+        // 선택된 항목이 있으면 강조 표시
+        if (selectedCount > 0) {
+            countElement.classList.remove('bg-light', 'text-dark');
+            countElement.classList.add('bg-success', 'text-white');
+        } else {
+            countElement.classList.remove('bg-success', 'text-white');
+            countElement.classList.add('bg-light', 'text-dark');
+        }
+    }
+    
+    log(`선택된 테스트 케이스 개수: ${selectedCount}개`);
+}
+
+// 모두 선택 버튼
+function setupSelectAll() {
+    const selectAllButton = document.getElementById('selectAll');
+    if (!selectAllButton) return;
+    
+    let allSelected = false;
+    
+    selectAllButton.addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"][name="selected_cases"]');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = !allSelected;
+        });
+        
+        allSelected = !allSelected;
+        this.innerHTML = allSelected ? 
+            '<i class="fas fa-square me-1"></i> 모두 선택 해제' : 
+            '<i class="fas fa-check-square me-1"></i> 모두 선택';
+        
+        // 선택된 항목 개수 업데이트
+        updateSelectedCount();
+    });
+}
+
+// 그룹별 선택 기능 설정
+function setupGroupSelection() {
+    const groupSelectButtons = document.querySelectorAll('.group-select');
+    
+    groupSelectButtons.forEach(button => {
+        const group = button.getAttribute('data-group');
+        let groupSelected = false;
+        
+        button.addEventListener('click', function(e) {
+            // 이벤트 버블링 방지 (그룹 헤더 클릭 이벤트와 충돌 방지)
+            e.stopPropagation();
+            
+            // 해당 그룹의 모든 체크박스 선택
+            const groupContainer = document.querySelector(`.${group}-group`);
+            if (!groupContainer) {
+                log(`${group} 그룹 컨테이너를 찾을 수 없습니다.`);
+                return;
+            }
+            
+            const checkboxes = groupContainer.querySelectorAll('input[type="checkbox"][name="selected_cases"]');
+            log(`${group} 그룹에서 ${checkboxes.length}개의 체크박스를 찾았습니다.`);
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !groupSelected;
+            });
+            
+            groupSelected = !groupSelected;
+            
+            // 버튼 텍스트 변경
+            this.innerHTML = groupSelected ? 
+                '<i class="fas fa-square me-1"></i> 해제' : 
+                '<i class="fas fa-check-square me-1"></i> 선택';
+            
+            log(`${group} 그룹의 선택 상태를 ${groupSelected ? '선택됨' : '선택 해제됨'}으로 변경했습니다.`);
+            
+            // 선택된 항목 개수 업데이트
+            updateSelectedCount();
+        });
+    });
+    
+    log("그룹별 선택 기능 설정 완료");
+}
+
+// 체크박스 변경 이벤트 설정
+function setupCheckboxListeners() {
+    // 개별 체크박스에 변경 이벤트 리스너 추가
+    document.addEventListener('change', function(event) {
+        if (event.target.matches('input[type="checkbox"][name="selected_cases"]')) {
+            updateSelectedCount();
+        }
+    });
+    
+    log("체크박스 변경 이벤트 설정 완료");
+}
+
+// 페이지 로드 시 실행
+document.addEventListener('DOMContentLoaded', function() {
+    // 테스트 케이스를 그룹화합니다
+    groupTestCases();
+    
+    // 검색 기능 설정
+    setupSearch();
+    
+    // 그룹 토글 기능 설정
+    setupGroupToggle();
+    
+    // 모두 선택 기능 설정
+    setupSelectAll();
+    
+    // 그룹별 선택 기능 설정
+    setupGroupSelection();
+    
+    // 체크박스 변경 이벤트 설정
+    setupCheckboxListeners();
+    
+    // 처음에 빈 그룹 숨기기
+    updateGroupVisibility();
+    
+    // 선택된 항목 개수 초기화
+    updateSelectedCount();
+    
+    // 부트스트랩 툴팁 초기화
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+});
+</script>
+
+<!-- Bootstrap JS 추가 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

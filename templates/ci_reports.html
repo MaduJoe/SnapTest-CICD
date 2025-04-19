@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CI/CD Test Reports</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .header {
+            border-bottom: 2px solid var(--light-color);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+        }
+        
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0 !important;
+            padding: 15px 20px;
+        }
+        
+        .report-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .report-item:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .report-date {
+            font-size: 0.9rem;
+            color: #777;
+        }
+        
+        .report-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stat-item {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .stat-total {
+            background-color: #e9f7fe;
+            color: #3498db;
+        }
+        
+        .stat-pass {
+            background-color: #e6f8e9;
+            color: #2ecc71;
+        }
+        
+        .stat-fail {
+            background-color: #fdf1f0;
+            color: #e74c3c;
+        }
+        
+        .ci-badge {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .badge-github {
+            background-color: #24292e;
+            color: white;
+        }
+        
+        .no-reports {
+            text-align: center;
+            padding: 50px 0;
+            color: #777;
+        }
+        
+        .btn-view {
+            padding: 5px 15px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-cogs me-2"></i>CI/CD 자동화 테스트 결과 <span class="ci-badge badge-github"><i class="fab fa-github me-1"></i>GitHub Actions</span></h1>
+            <p class="text-muted">GitHub Actions를 통해 자동으로 실행된 테스트 결과를 확인할 수 있습니다.</p>
+        </div>
+
+        {% if reports %}
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-history me-2"></i> 테스트 실행 내역
+            </div>
+            <div class="card-body p-0">
+                {% for report in reports %}
+                <div class="report-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">테스트 실행 #{{ loop.index }}</h5>
+                            <div class="report-date">
+                                <i class="far fa-calendar-alt me-1"></i> {{ report.timestamp }}
+                            </div>
+                        </div>
+                        <a href="{{ url_for('view_ci_report', report_id=report.id) }}" class="btn btn-sm btn-primary btn-view">
+                            <i class="fas fa-eye me-1"></i> 상세 보기
+                        </a>
+                    </div>
+                    <div class="report-stats">
+                        <div class="stat-item stat-total">
+                            <i class="fas fa-tasks me-1"></i> 전체: {{ report.total_tests }}개
+                        </div>
+                        <div class="stat-item stat-pass">
+                            <i class="fas fa-check-circle me-1"></i> 성공: {{ report.pass_count }}개
+                        </div>
+                        <div class="stat-item stat-fail">
+                            <i class="fas fa-times-circle me-1"></i> 실패: {{ report.fail_count }}개
+                        </div>
+                        <div class="stat-item {% if report.success_rate >= 90 %}stat-pass{% elif report.success_rate >= 70 %}stat-warning{% else %}stat-fail{% endif %}">
+                            <i class="fas fa-percentage me-1"></i> 성공률: {{ report.success_rate }}%
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="no-reports">
+            <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+            <h4>아직 CI/CD 테스트 결과가 없습니다</h4>
+            <p>GitHub Actions에서 테스트가 실행되면 결과가 여기에 표시됩니다.</p>
+            <a href="https://github.com/{{ github_repo }}/actions" target="_blank" class="btn btn-primary mt-2">
+                <i class="fab fa-github me-1"></i> GitHub Actions 확인하기
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> 홈으로 돌아가기
+            </a>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

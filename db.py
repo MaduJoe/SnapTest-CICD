@@ -2,7 +2,7 @@
 import sqlite3
 from datetime import datetime
 
-DB_NAME = 'tossify.db'
+DB_NAME = 'snaptest.db'
 
 def get_db_connection():
     conn = sqlite3.connect(DB_NAME)
@@ -57,7 +57,24 @@ def get_all_reports():
     cursor.execute('SELECT * FROM reports ORDER BY timestamp DESC')
     rows = cursor.fetchall()
     conn.close()
-    return rows
+    
+    # SQLite Row 객체를 JSON 직렬화 가능한 딕셔너리로 변환
+    reports = []
+    for row in rows:
+        report = {
+            "id": row["id"],
+            "test_case": str(row["test_case"]),
+            "description": str(row["description"] or ""),
+            "status": str(row["status"]),
+            "output": str(row["output"] or ""),
+            "error": str(row["error"] or ""),
+            "traceback": str(row["traceback"] or ""),
+            "log": str(row["log"] or ""),
+            "timestamp": str(row["timestamp"]),
+            "duration": float(row["duration"] or 0.0)
+        }
+        reports.append(report)
+    return reports
 
 def get_report_stats():
     conn = get_db_connection()
@@ -81,7 +98,24 @@ def get_report_by_id(report_id):
     cursor.execute('SELECT * FROM reports WHERE id = ?', (report_id,))
     row = cursor.fetchone()
     conn.close()
-    return dict(row) if row else None
+    
+    if not row:
+        return None
+        
+    # SQLite Row 객체를 JSON 직렬화 가능한 딕셔너리로 변환
+    report = {
+        "id": row["id"],
+        "test_case": str(row["test_case"]),
+        "description": str(row["description"] or ""),
+        "status": str(row["status"]),
+        "output": str(row["output"] or ""),
+        "error": str(row["error"] or ""),
+        "traceback": str(row["traceback"] or ""),
+        "log": str(row["log"] or ""),
+        "timestamp": str(row["timestamp"]),
+        "duration": float(row["duration"] or 0.0)
+    }
+    return report
 
 def delete_report_by_id(report_id):
     conn = get_db_connection()
@@ -145,4 +179,17 @@ def get_all_test_case_stats():
     cursor.execute('SELECT * FROM test_case_stats ORDER BY success_rate DESC')
     rows = cursor.fetchall()
     conn.close()
-    return rows
+    
+    # SQLite Row 객체를 딕셔너리로 변환
+    stats = []
+    for row in rows:
+        stat = {
+            "test_case": row["test_case"],
+            "total_runs": row["run_count"],
+            "pass_count": row["pass_count"],
+            "fail_count": row["fail_count"],
+            "last_run": row["last_run"],
+            "success_rate": float(row["success_rate"]) if row["success_rate"] is not None else 0.0
+        }
+        stats.append(stat)
+    return stats
