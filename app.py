@@ -5,7 +5,7 @@ import inspect
 from datetime import datetime
 from dotenv import load_dotenv
 from db import get_all_test_case_stats, init_db, get_all_reports, get_average_duration, get_report_by_id
-from runner import run_test_case
+from runner import run_test_case, init_scheduler
 import tests.functions as test_functions
 import traceback
 
@@ -169,6 +169,11 @@ def run_tests():
         selected_cases = request.form.getlist('selected_cases')
         print(f"[DEBUG] Selected test cases: {selected_cases}")
         
+        # Check if any test cases are selected
+        if not selected_cases:
+            flash('실행할 테스트 케이스를 선택해주세요.', 'warning')
+            return redirect(url_for('index'))
+            
         results = []
         for case in selected_cases:
             print(f"[DEBUG] Running case: {case}")
@@ -457,15 +462,16 @@ def api_reports():
         avg_duration = get_average_duration()
         
         # 리포트 데이터 제한 (최대 20개)
-        reports = reports[:20]
+        limited_reports = reports[:20]
         
         # HTML 부분만 렌더링
-        reports_html = render_template('reports_partial.html', reports=reports)
+        reports_html = render_template('reports_partial.html', reports=limited_reports)
         
         # JSON으로 데이터 반환
         return jsonify({
             'html': reports_html,
             'avg_duration': avg_duration,
+            'reports': limited_reports,  # 전체 리포트 데이터 포함
             'chart': {
                 'labels': ['FAIL', 'PASS'],
                 'values': [fail_count, pass_count]
@@ -676,6 +682,96 @@ def view_ci_report(report_id):
         flash(f'보고서를 읽는 중 오류가 발생했습니다: {str(e)}', 'error')
         return redirect(url_for('ci_reports'))
 
+@app.route('/run_batch', methods=['POST'])
+def run_batch_tests():
+    try:
+        selected_cases = request.form.getlist('selected_cases')
+        run_async = request.form.get('run_async') == 'true'
+        
+        # Check if any test cases are selected
+        if not selected_cases:
+            flash('실행할 테스트 케이스를 선택해주세요.', 'warning')
+            return redirect(url_for('index'))
+            
+        if run_async:
+            # background_worker 활용: 큐에 작업 추가
+            from background_worker import test_queue, start_background_worker
+            
+            # 백그라운드 워커가 실행 중이 아니면 시작
+            start_background_worker()
+            
+            # 큐에 선택된 모든 테스트 케이스 추가
+            for case in selected_cases:
+                test_queue.put(case)
+                
+            total = len(selected_cases)
+            flash(f'{total}개의 테스트가 백그라운드에서 실행됩니다. 결과는 대시보드에서 확인하세요.', 'info')
+            return redirect(url_for('index'))
+        else:
+            # 동기식 실행 - 일반 run 라우트와 동일한 방식으로 처리
+            results = []
+            for case in selected_cases:
+                print(f"[DEBUG] Running batch case: {case}")
+                result = run_test_case(case)
+                
+                if result:
+                    try:
+                        result_json = json.dumps(result)
+                        parsed_result = json.loads(result_json)
+                        results.append(parsed_result)
+                    except Exception as e:
+                        print(f"[DEBUG] Error processing batch result: {str(e)}")
+                        error_result = {
+                            "test_case": {"name": case},
+                            "result": {
+                                "status": "ERROR",
+                                "error": f"Result processing error: {str(e)}",
+                                "result": ""
+                            }
+                        }
+                        results.append(error_result)
+            
+            print(f"[DEBUG] All batch results processed. Redirecting to dashboard.")
+            return redirect(url_for('dashboard'))
+    except Exception as e:
+        print(f"[DEBUG] Critical error in run_batch_tests: {str(e)}")
+        print(traceback.format_exc())
+        flash(f'테스트 실행 중 오류가 발생했습니다: {str(e)}', 'error')
+        return redirect(url_for('dashboard'))
+
+@app.route('/api/background_status')
+def background_status():
+    """백그라운드 작업 상태를 반환하는 API 엔드포인트"""
+    try:
+        from background_worker import get_worker_status, get_queue_size, get_processed_count
+        
+        # 워커 상태 정보 가져오기
+        is_running = get_worker_status()
+        queue_size = get_queue_size()
+        processed = get_processed_count()
+        
+        # 작업 완료 여부 판단 (대기열이 비었고 처리된 작업이 있으면 '완료' 상태로 간주)
+        is_completed = (queue_size == 0 and processed > 0 and not is_running)
+        
+        return jsonify({
+            'is_running': is_running,
+            'queue_size': queue_size,
+            'processed_count': processed,
+            'is_completed': is_completed,
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+    except Exception as e:
+        print(f"[DEBUG] Error getting background status: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     init_db()
+    
+    # 백그라운드 스케줄러 시작 (선택적)
+    try:
+        init_scheduler()
+        print("Background test scheduler initialized.")
+    except Exception as e:
+        print(f"Note: Background scheduler not initialized: {str(e)}")
+    
     app.run(debug=True) 

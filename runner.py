@@ -9,6 +9,8 @@ import importlib.util
 from datetime import datetime
 from db import insert_report, update_test_case_stats
 import tests.functions as test_functions
+# 순환 참조 제거
+# from background_worker import start_scheduler
 
 # 테스트 함수 동적 로딩
 
@@ -159,3 +161,15 @@ def save_report(report):
 
     with open(filename, 'w') as f:
         json.dump(report, f, indent=2)
+
+# 지연 임포트를 통한 스케줄러 시작 함수
+def init_scheduler():
+    """앱 시작 시 호출하여 스케줄러를 시작합니다."""
+    try:
+        from background_worker import start_scheduler
+        start_scheduler()
+        print("[INFO] Background scheduler started successfully")
+    except ImportError as e:
+        print(f"[WARNING] Could not start background scheduler: {str(e)}")
+    except Exception as e:
+        print(f"[ERROR] Error starting background scheduler: {str(e)}")

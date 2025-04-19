@@ -1,0 +1,15 @@
+{
+  "test_case": {
+    "name": "Failure Test",
+    "description": "This test should fail intentionally",
+    "test_function": "fail_test",
+    "parameters": {}
+  },
+  "result": {
+    "status": "FAIL",
+    "result": "This test should fail.",
+    "error": ""
+  },
+  "execution_time": "0.001474",
+  "timestamp": "2025-04-19 18:17:29.947097"
+}

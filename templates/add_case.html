@@ -113,11 +113,8 @@
   </style>
 </head>
 <body>
-<div class="container py-5">
-
-  <h1 class="page-header">
-    <i class="fas fa-plus-circle me-2"></i> 테스트 케이스 등록
-  </h1>
+<div class="container py-4">
+  <h2 class="mb-4">새 테스트 케이스 추가</h2>
 
   <form method="post" action="{{ url_for('add_case') }}" id="addCaseForm" class="needs-validation" novalidate>
     <div class="mb-3">
@@ -137,7 +134,7 @@
       <select class="form-select" id="test_function" name="test_function" required onchange="updateParameterFields()">
         <option value="">테스트 함수를 선택하세요</option>
         {% for func in test_functions %}
-        <option value="{{ func.name }}" data-parameters='{{ func.parameters|tojson }}'>
+        <option value="{{ func.name }}" data-parameters="{{ func.parameters|tojson }}">
           {{ func.name }}
         </option>
         {% endfor %}
@@ -167,115 +164,101 @@
     </div>
   </form>
 
-  <!-- 디버깅 정보 -->
-  <h4 class="section-title mt-5"><i class="fas fa-bug me-2"></i>사용 가능한 테스트 함수</h4>
-  <pre class="debug">
-{% for func in test_functions %}
-- {{ func.name }}
-  Parameters: {{ func.parameters|tojson }}
-{% endfor %}
-  </pre>
-
   <script>
     function updateParameterFields() {
       const select = document.getElementById('test_function');
       const container = document.getElementById('parameters_container');
-      const parametersInput = document.getElementById('parameters');
+      container.innerHTML = '';
       
-      console.log('Selected function: ' + select.value);
-      
-      // 선택된 옵션의 파라미터 정보 가져오기
+      // 선택된 테스트 함수의 파라미터 데이터 얻기
       const selectedOption = select.options[select.selectedIndex];
-      if (!selectedOption.value) {
-        container.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i> 테스트 함수를 선택하면 파라미터 입력 필드가 나타납니다.</div>';
-        parametersInput.value = '{}';
-        return;
-      }
+      const parametersString = selectedOption.getAttribute('data-parameters');
       
       try {
-        const parameters = JSON.parse(selectedOption.dataset.parameters);
-        console.log('Parameters:', parameters);
+        const parameters = JSON.parse(parametersString);
         
-        // 파라미터 입력 필드 생성
-        let html = '<div class="row">';
-        parameters.forEach((param, index) => {
-          html += `
-            <div class="col-md-4 mb-3">
-              <div class="parameter-row">
-                <label class="form-label"><i class="fas fa-cube me-1"></i> ${param}</label>
-                <input type="text" class="form-control parameter-input" 
-                       data-param="${param}" required
-                       placeholder="${getPlaceholder(param)}">
-                <div class="invalid-feedback">이 필드는 필수입니다.</div>
-              </div>
-            </div>
-          `;
-        });
-        html += '</div>';
-        
-        container.innerHTML = html;
-        
-        // 파라미터 값이 변경될 때마다 hidden input 업데이트
-        const inputs = container.getElementsByClassName('parameter-input');
-        Array.from(inputs).forEach(input => {
-          input.addEventListener('input', updateParametersJson);
-        });
-        
-        updateParametersJson();
+        // 파라미터 UI 생성
+        if (parameters && parameters.length > 0) {
+          let row = document.createElement('div');
+          row.className = 'row mb-3';
+          let col = 0;
+          
+          parameters.forEach(param => {
+            // 3개 컬럼마다 새로운 행 시작
+            if (col % 3 === 0 && col !== 0) {
+              container.appendChild(row);
+              row = document.createElement('div');
+              row.className = 'row mb-3';
+            }
+            
+            const formGroup = document.createElement('div');
+            formGroup.className = 'col-md-4 mb-3';
+            
+            const label = document.createElement('label');
+            label.setAttribute('for', `param_${param}`);
+            label.textContent = `${param}:`;
+            label.className = 'form-label';
+            
+            const input = document.createElement('input');
+            input.setAttribute('type', 'text');
+            input.setAttribute('id', `param_${param}`);
+            input.setAttribute('data-param', param);
+            input.setAttribute('class', 'form-control parameter-input');
+            input.setAttribute('placeholder', getPlaceholder(param));
+            input.setAttribute('required', 'true');
+            input.addEventListener('input', updateParametersJson);
+            
+            formGroup.appendChild(label);
+            formGroup.appendChild(input);
+            row.appendChild(formGroup);
+            col++;
+          });
+          
+          // 마지막 행 추가
+          if (row.children.length > 0) {
+            container.appendChild(row);
+          }
+        } else {
+          container.innerHTML = '<div class="alert alert-info">이 테스트 함수에는 파라미터가 없습니다.</div>';
+        }
       } catch (e) {
-        console.error('Error parsing parameters:', e);
-        container.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i> 파라미터 정보를 불러오는 중 오류가 발생했습니다.</div>';
+        container.innerHTML = `<div class="alert alert-danger">파라미터 정보를 처리하는 중 오류가 발생했습니다: ${e.message}</div>`;
       }
+      
+      updateParametersJson();
     }
     
-    function getPlaceholder(param) {
-      switch(param) {
-        case 'expected':
-          return '기대하는 결과값을 입력하세요';
-        case 'expected_message':
-          return '기대하는 메시지를 입력하세요';
-        case 'a':
-          return '첫 번째 값을 입력하세요';
-        case 'b':
-          return '두 번째 값을 입력하세요';
-        case 's1':
-          return '첫 번째 문자열을 입력하세요';
-        case 's2':
-          return '두 번째 문자열을 입력하세요';
-        case 'is_maintenance':
-          return 'true 또는 false';
-        default:
-          return `${param} 값을 입력하세요`;
+    function getPlaceholder(paramName) {
+      // Add appropriate placeholders based on parameter name
+      if (paramName.includes('num') || paramName === 'a' || paramName === 'b') {
+        return "숫자 입력 (예: 10)";
+      } else if (paramName.includes('str') || paramName === 'text') {
+        return "텍스트 입력 (예: 'hello')";
+      } else if (paramName.includes('bool')) {
+        return "True 또는 False";
+      } else {
+        return "값 입력";
       }
     }
     
     function updateParametersJson() {
-      const inputs = document.getElementsByClassName('parameter-input');
-      const parameters = {};
+      const paramInputs = document.getElementsByClassName('parameter-input');
+      const paramsJson = document.getElementById('parameters');
       
-      Array.from(inputs).forEach(input => {
-        let value = input.value.trim();
-        
-        // boolean 값 처리
-        if (value.toLowerCase() === 'true') {
-          value = true;
-        } else if (value.toLowerCase() === 'false') {
-          value = false;
-        }
-        // 숫자로 변환 시도
-        else if (!isNaN(value) && value !== '') {
-          value = Number(value);
-        }
-        
-        parameters[input.dataset.param] = value;
+      const paramValues = {};
+      
+      Array.from(paramInputs).forEach(input => {
+        const paramName = input.getAttribute('data-param');
+        paramValues[paramName] = input.value;
       });
       
-      // 한글이 제대로 표시되도록 JSON 직렬화
-      // JavaScript에서는 native stringify가 한글을 이스케이프하지 않음
-      const jsonString = JSON.stringify(parameters, null, 2);
-      document.getElementById('parameters').value = jsonString;
-      console.log('Updated parameters:', parameters);
+      paramsJson.value = JSON.stringify(paramValues);
     }
+    
+    // Initial update on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      updateParameterFields();
+    });
     
     // 폼 유효성 검사
     (function () {

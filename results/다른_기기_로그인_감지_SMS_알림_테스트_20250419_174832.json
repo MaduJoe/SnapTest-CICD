@@ -1,0 +1,21 @@
+{
+  "test_case": {
+    "name": "다른 기기 로그인 감지 SMS 알림 테스트",
+    "description": "다른 기기에서 로그인 시 SMS 알림이 정상적으로 전송되는지 확인하는 테스트",
+    "test_function": "detect_login_from_different_device_sms_notification_test",
+    "parameters": {
+      "user_id": "testuser123",
+      "device_id_1": "deviceA123",
+      "device_id_2": "deviceB456",
+      "expected": "True",
+      "sms_message": "다른 기기에서 로그인이 감지되었습니다."
+    }
+  },
+  "result": {
+    "status": "PASS",
+    "result": "True",
+    "error": ""
+  },
+  "execution_time": "0.002108",
+  "timestamp": "2025-04-19 17:48:32.513075"
+}

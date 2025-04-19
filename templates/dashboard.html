@@ -57,6 +57,38 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     }
     
+    /* 차트 영역 스타일 개선 */
+    .position-relative {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .position-absolute {
+      animation: scaleIn 0.8s ease-in-out;
+    }
+    
+    @keyframes scaleIn {
+      from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+      to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    
+    .test-summary {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid var(--primary-color);
+      animation: slideIn 0.6s ease-in-out;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
     .status-badge {
       font-weight: bold;
       padding: 0.4em 0.8em;
@@ -230,8 +262,61 @@
       <!-- 차트 -->
       <div class="chart-container">
         <h5 class="mb-3 section-title">성공/실패 비율</h5>
-        <div class="d-flex justify-content-center">
-          <canvas id="reportChart" style="max-width: 300px; max-height: 300px;"></canvas>
+        <div class="row">
+          <div class="col-md-6 d-flex justify-content-center align-items-center">
+            <div class="position-relative">
+              <canvas id="reportChart" style="max-width: 300px; max-height: 300px;"></canvas>
+              <!-- 차트 중앙에 성공률 표시 -->
+              <div class="position-absolute top-50 start-50 translate-middle text-center">
+                <h3 id="success-rate-center" class="mb-0 fw-bold">
+                  {% if values[0] + values[1] > 0 %}
+                    {% set success_rate = (values[1] / (values[0] + values[1]) * 100) | round | int %}
+                    {{ success_rate }}%
+                  {% else %}
+                    0%
+                  {% endif %}
+                </h3>
+                <small class="text-muted">성공률</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="test-summary p-3">
+              <h6 class="fw-bold mb-3">테스트 실행 요약</h6>
+              <div class="d-flex justify-content-between mb-2">
+                <div class="text-muted">총 실행 횟수:</div>
+                <div class="fw-bold">{{ values[0] + values[1] }}회</div>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <div class="text-success">
+                  <i class="fas fa-check-circle me-1"></i> 성공:
+                </div>
+                <div class="fw-bold text-success">{{ values[1] }}회</div>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <div class="text-danger">
+                  <i class="fas fa-times-circle me-1"></i> 실패:
+                </div>
+                <div class="fw-bold text-danger">{{ values[0] }}회</div>
+              </div>
+              <hr class="my-3">
+              <div class="progress" style="height: 8px;">
+                {% if values[0] + values[1] > 0 %}
+                  {% set progress_width = (values[1] / (values[0] + values[1]) * 100) | round | int %}
+                {% else %}
+                  {% set progress_width = 0 %}
+                {% endif %}
+                <div class="progress-bar bg-success" role="progressbar" 
+                     style="width: {{ progress_width }}%;" 
+                     aria-valuenow="{{ progress_width }}" 
+                     aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <div class="d-flex justify-content-between mt-2">
+                <div class="small text-muted">가장 최근 실행:</div>
+                <div class="small">{{ reports[0].timestamp if reports else '없음' }}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -240,6 +325,43 @@
       <div class="stats-card">
         <h5 class="text-muted mb-3"><i class="fas fa-clock me-2"></i> 평균 실행 시간</h5>
         <h2><span id="avg-duration">{{ avg_duration }}</span> 초</h2>
+      </div>
+      
+      <!-- 테스트 성능 지표 추가 -->
+      <div class="stats-card">
+        <h5 class="text-muted mb-3"><i class="fas fa-tachometer-alt me-2"></i> 테스트 성능</h5>
+        <div class="d-flex justify-content-between mb-2">
+          <div>가장 빠른 테스트:</div>
+          <div class="fw-bold">
+            {% if reports %}
+              {% set min_duration = 9999 %}
+              {% for report in reports %}
+                {% if report.duration is defined and report.duration < min_duration %}
+                  {% set min_duration = report.duration %}
+                {% endif %}
+              {% endfor %}
+              {{ min_duration if min_duration != 9999 else 0 }} 초
+            {% else %}
+              0 초
+            {% endif %}
+          </div>
+        </div>
+        <div class="d-flex justify-content-between">
+          <div>가장 느린 테스트:</div>
+          <div class="fw-bold">
+            {% if reports %}
+              {% set max_duration = 0 %}
+              {% for report in reports %}
+                {% if report.duration is defined and report.duration > max_duration %}
+                  {% set max_duration = report.duration %}
+                {% endif %}
+              {% endfor %}
+              {{ max_duration }} 초
+            {% else %}
+              0 초
+            {% endif %}
+          </div>
+        </div>
       </div>
       
       <!-- 필터 컨트롤 모바일용 -->
@@ -330,9 +452,9 @@
           <button type="button" class="btn filter-btn {% if not status_filter %}btn-dark{% else %}btn-outline-dark{% endif %}" data-filter="">
             <i class="fas fa-list me-1"></i> 전체
           </button>
-        </div>
+      </div>
 
-        <div class="btn-group" role="group">
+      <div class="btn-group" role="group">
           <button type="button" class="btn sort-btn {% if sort_order == 'desc' %}btn-primary{% else %}btn-outline-primary{% endif %}" data-sort="desc">
             <i class="fas fa-sort-amount-down me-1"></i> 최신순
           </button>
@@ -414,6 +536,24 @@
       if (window.testChart) {
         window.testChart.destroy();
       }
+      
+      // 성공률과 총 실행 계산
+      const totalRuns = values.reduce((a, b) => a + b, 0);
+      const successRate = totalRuns > 0 ? Math.round((values[1] / totalRuns) * 100) : 0;
+      
+      // 차트 중앙 성공률 업데이트
+      document.getElementById('success-rate-center').textContent = `${successRate}%`;
+      
+      // 테스트 요약 정보 업데이트
+      document.querySelector('.test-summary .fw-bold:nth-of-type(1)').textContent = `${totalRuns}회`;
+      document.querySelector('.test-summary .text-success + .fw-bold').textContent = `${values[1]}회`;
+      document.querySelector('.test-summary .text-danger + .fw-bold').textContent = `${values[0]}회`;
+      
+      // 프로그레스 바 업데이트
+      const progressBar = document.querySelector('.progress-bar');
+      progressBar.style.width = `${successRate}%`;
+      progressBar.setAttribute('aria-valuenow', successRate);
+      
       window.testChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -429,6 +569,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: true,
+          cutout: '70%', // 도넛 두께 조정
           plugins: {
             legend: {
               position: 'bottom',
@@ -444,8 +585,9 @@
                 label: function(context) {
                   const label = context.label;
                   const value = context.raw;
-                  if (label === 'PASS') return `성공 횟수: ${value}`;
-                  if (label === 'FAIL') return `실패 횟수: ${value}`;
+                  const percent = totalRuns > 0 ? Math.round((value / totalRuns) * 100) : 0;
+                  if (label === 'PASS') return `성공 횟수: ${value} (${percent}%)`;
+                  if (label === 'FAIL') return `실패 횟수: ${value} (${percent}%)`;
                   return `${label}: ${value}`;
                 }
               }
@@ -457,11 +599,21 @@
 
     // 초기 차트 설정
     $(document).ready(function() {
-      initChart({{ labels|tojson }}, {{ values|tojson }});
+      // 템플릿 값을 JavaScript 변수로 안전하게 전달
+      const chartLabels = {{ labels|tojson|safe }};
+      const chartValues = {{ values|tojson|safe }};
+      
+      // Jinja2 템플릿 변수들을 안전하게 JavaScript 변수로 변환
+      const statusFilter = '{{ status_filter or "" }}';
+      const sortOrder = '{{ sort_order or "desc" }}';
+      const keywordSearch = '{{ keyword or "" }}';
+      
+      // 차트 초기화 호출
+      initChart(chartLabels, chartValues);
     
-      let currentFilter = '{{ status_filter or "" }}';
-      let currentSort = '{{ sort_order or "desc" }}';
-      let currentSearch = '{{ keyword or "" }}';
+      let currentFilter = statusFilter;
+      let currentSort = sortOrder;
+      let currentSearch = keywordSearch;
 
       // AJAX 로드 함수
       function loadReports() {
@@ -478,7 +630,17 @@
           success: function(data) {
             $('#reports-content').html(data.html);
             $('#avg-duration').text(data.avg_duration);
+            
+            // 차트 업데이트
             initChart(data.chart.labels, data.chart.values);
+            
+            // 최근 실행 시간 업데이트
+            if (data.reports && data.reports.length > 0) {
+              $('.test-summary .small:last').text(data.reports[0].timestamp);
+            }
+            
+            // 테스트 성능 지표 업데이트 (필요 시)
+            updatePerformanceMetrics(data.reports);
           },
           error: function() {
             alert('데이터를 불러오는 중 오류가 발생했습니다.');
@@ -487,6 +649,31 @@
             $('.loading').remove();
           }
         });
+      }
+      
+      // 테스트 성능 지표 업데이트 함수
+      function updatePerformanceMetrics(reports) {
+        if (!reports || reports.length === 0) return;
+        
+        // 실행 시간을 기준으로 최소/최대 찾기
+        let minDuration = Infinity;
+        let maxDuration = 0;
+        
+        reports.forEach(report => {
+          const duration = report.duration || 0;
+          if (duration < minDuration) minDuration = duration;
+          if (duration > maxDuration) maxDuration = duration;
+        });
+        
+        // 성능 카드 업데이트
+        const perfCard = document.querySelector('.stats-card:nth-of-type(2)');
+        if (perfCard) {
+          const minElement = perfCard.querySelector('.d-flex:nth-of-type(1) .fw-bold');
+          const maxElement = perfCard.querySelector('.d-flex:nth-of-type(2) .fw-bold');
+          
+          if (minElement) minElement.textContent = `${minDuration === Infinity ? 0 : minDuration} 초`;
+          if (maxElement) maxElement.textContent = `${maxDuration} 초`;
+        }
       }
 
       // 필터 버튼 클릭

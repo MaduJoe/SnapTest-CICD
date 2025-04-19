@@ -264,7 +264,7 @@
             <div class="card-body p-0">
                 <!-- 원본 테스트 케이스 목록 (그룹화 전) -->
                 <div id="originalCasesList">
-                    {% for case in cases %}
+            {% for case in cases %}
                     <div class="test-case-item testcase-item">
                         <div class="testcase-info">
                             <input type="checkbox" name="selected_cases" value="{{ case.filename }}" id="case-{{ loop.index }}" class="form-check-input">
@@ -273,7 +273,7 @@
                                 <span class="text-muted d-block small">
                                     <span class="test-function">{{ case.test_function }}</span>
                                 </span>
-                            </label>
+            </label>
                         </div>
                         <div class="testcase-actions">
                             <a href="{{ url_for('edit_case', filename=case.filename) }}" class="btn btn-sm btn-outline-primary action-btn">
@@ -436,13 +436,76 @@
             </div>
             
             <div class="card-footer">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-play me-1"></i> 선택 항목 실행
-                    <span id="selectedCount" class="badge bg-light text-dark ms-1">0개</span>
-                </button>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="runAsync" name="run_async" value="true">
+                        <label class="form-check-label" for="runAsync">
+                            <i class="fas fa-clock"></i> 백그라운드에서 실행 <span class="text-muted small">(배치 실행 전용)</span>
+                            <span class="badge bg-info ms-1" data-bs-toggle="tooltip" title="백그라운드 실행을 선택하면 배치 실행 버튼만 사용할 수 있습니다">?</span>
+                        </label>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-play me-1"></i> 선택 항목 실행
+                            <span id="selectedCount" class="badge bg-light text-dark ms-1">0개</span>
+                        </button>
+                        <button type="submit" formaction="/run_batch" class="btn btn-outline-primary">
+                            <i class="fas fa-tasks me-1"></i> 배치 실행
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </form>
+
+    <!-- 백그라운드 작업 상태 표시 -->
+    <div id="backgroundStatus" class="card mt-3" style="display: none;">
+        <div class="card-header bg-info text-white">
+            <i class="fas fa-cogs me-2"></i> 백그라운드 작업 상태
+            <button type="button" class="btn-close float-end" id="closeBackgroundStatus" 
+                    aria-label="Close" style="font-size: 0.7rem; color: white;"></button>
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <span id="workerStatus" class="badge bg-secondary">
+                        <i class="fas fa-circle-notch me-1"></i> 상태 확인 중...
+                    </span>
+                </div>
+                <div class="text-muted small" id="lastUpdated">마지막 업데이트: </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-2">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between">
+                                <div><i class="fas fa-tasks me-1"></i> 대기 중인 작업:</div>
+                                <div id="queueSize" class="fw-bold">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-2">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between">
+                                <div><i class="fas fa-check-circle me-1"></i> 완료된 작업:</div>
+                                <div id="processedCount" class="fw-bold">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="progress mt-2">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                     role="progressbar" style="width: 0%"></div>
+            </div>
+            
+            <div class="mt-3 small text-muted">백그라운드 작업이 진행 중입니다. 이 창을 닫아도 작업은 계속 진행됩니다.</div>
+        </div>
+    </div>
     {% else %}
     <div class="card">
         <div class="card-body no-cases">
@@ -736,6 +799,338 @@ function setupCheckboxListeners() {
     log("체크박스 변경 이벤트 설정 완료");
 }
 
+// 백그라운드 실행 체크박스 설정
+function setupRunAsyncCheckbox() {
+    const runAsyncCheckbox = document.getElementById('runAsync');
+    const runButton = document.querySelector('button[type="submit"].btn-primary'); // 선택 항목 실행 버튼
+    
+    if (!runAsyncCheckbox || !runButton) return;
+    
+    // 체크박스 상태 변경 시 실행 버튼 활성화/비활성화
+    runAsyncCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            // 백그라운드 실행 선택 시 선택 항목 실행 버튼 비활성화
+            runButton.disabled = true;
+            runButton.title = '백그라운드 실행은 배치 실행에서만 지원됩니다';
+            // 시각적 피드백 추가
+            runButton.classList.add('btn-secondary');
+            runButton.classList.remove('btn-primary');
+        } else {
+            // 백그라운드 실행 해제 시 선택 항목 실행 버튼 활성화
+            runButton.disabled = false;
+            runButton.title = '';
+            // 시각적 피드백 원상복구
+            runButton.classList.add('btn-primary');
+            runButton.classList.remove('btn-secondary');
+        }
+    });
+    
+    // 페이지 로드 시 초기 상태 설정
+    if (runAsyncCheckbox.checked) {
+        runButton.disabled = true;
+        runButton.title = '백그라운드 실행은 배치 실행에서만 지원됩니다';
+        runButton.classList.add('btn-secondary');
+        runButton.classList.remove('btn-primary');
+    }
+}
+
+// 백그라운드 작업 상태 관련 변수
+let statusCheckInterval = null;
+let totalTasks = 0;
+let totalTasksFixed = false; // 총 작업 수 확정 여부
+
+// 백그라운드 작업 상태 확인 설정
+function setupBackgroundStatusCheck() {
+    const closeButton = document.getElementById('closeBackgroundStatus');
+    if (closeButton) {
+        closeButton.addEventListener('click', function() {
+            document.getElementById('backgroundStatus').style.display = 'none';
+            // 백그라운드 상태 확인 중지
+            if (statusCheckInterval) {
+                clearInterval(statusCheckInterval);
+                statusCheckInterval = null;
+            }
+        });
+    }
+    
+    // 백그라운드 실행 버튼 클릭 시 상태 확인 시작
+    const batchButton = document.querySelector('button[formaction="/run_batch"]');
+    const runAsyncCheckbox = document.getElementById('runAsync');
+    
+    if (batchButton && runAsyncCheckbox) {
+        batchButton.addEventListener('click', function(e) {
+            if (runAsyncCheckbox.checked) {
+                // 선택된 케이스 수 확인
+                const selectedCases = document.querySelectorAll('input[name="selected_cases"]:checked');
+                if (selectedCases.length === 0) {
+                    return; // 선택된 케이스가 없으면 처리하지 않음
+                }
+                
+                // 전체 작업 수 저장
+                totalTasks = selectedCases.length;
+                totalTasksFixed = true; // 총 작업 수 확정
+                console.log(`총 작업 수 설정: ${totalTasks}`);
+                
+                // 폼 제출 후 상태 확인 시작
+                setTimeout(function() {
+                    // 상태 패널 표시
+                    document.getElementById('backgroundStatus').style.display = 'block';
+                    // 상태 확인 시작
+                    checkBackgroundStatus();
+                    // 주기적 확인 설정 (1초마다 - 더 빠른 상태 업데이트)
+                    statusCheckInterval = setInterval(checkBackgroundStatus, 1000);
+                }, 1000); // 서버가 요청을 처리할 시간을 주기 위해 1초 지연
+            }
+        });
+    }
+    
+    // 페이지 로드 시 백그라운드 작업 상태 확인
+    checkInitialBackgroundStatus();
+}
+
+// 초기 백그라운드 상태 확인
+function checkInitialBackgroundStatus() {
+    fetch('/api/background_status')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP 오류: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // API 응답이 예상대로인지 검증
+            if (typeof data !== 'object') {
+                console.error('API 응답이 객체가 아님:', data);
+                return;
+            }
+            
+            // JSON이 올바른 필드를 가지고 있는지 확인
+            if ('is_running' in data && 'is_completed' in data) {
+                console.log('Initial background status check:', data);
+                
+                // 진행 중이거나 완료된 작업이 있으면 상태 패널 표시
+                if ((data.is_running === true || data.is_completed === true) && 
+                    (data.queue_size > 0 || data.processed_count > 0)) {
+                    
+                    document.getElementById('backgroundStatus').style.display = 'block';
+                    
+                    // 총 작업 수가 아직 설정되지 않은 경우에만 설정
+                    if (!totalTasksFixed) {
+                        // 이미 처리된 작업 + 대기 중인 작업으로 예상 총 작업 수 설정
+                        totalTasks = Math.max(data.processed_count + data.queue_size, 1);
+                        console.log(`이전 작업 감지: 예상 총 작업 수 ${totalTasks} (처리됨: ${data.processed_count}, 대기 중: ${data.queue_size})`);
+                    }
+                    
+                    updateStatusUI(data);
+                    
+                    // 주기적 확인 설정 (아직 설정되지 않은 경우)
+                    if (!statusCheckInterval && !data.is_completed) {
+                        statusCheckInterval = setInterval(checkBackgroundStatus, 1000);
+                    }
+                }
+            } else {
+                console.error('API 응답에 필요한 필드가 없음:', data);
+            }
+        })
+        .catch(error => {
+            console.error('초기 백그라운드 상태 확인 오류:', error);
+            // 오류 발생 시에도 필요하다면 처리 로직 추가
+        });
+}
+
+// 백그라운드 작업 상태 확인
+function checkBackgroundStatus() {
+    fetch('/api/background_status')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP 오류: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // API 응답이 예상대로인지 검증
+            if (typeof data !== 'object') {
+                console.error('API 응답이 객체가 아님:', data);
+                return;
+            }
+            
+            // JSON이 올바른 필드를 가지고 있는지 확인
+            if ('is_running' in data && 'is_completed' in data) {
+                // 진정한 완료 상태 평가 (서버에서 완료로 표시되었거나, 큐가 비었고 워커가 대기 중이면서 작업이 처리된 경우)
+                const isReallyCompleted = data.is_completed === true || 
+                                        (data.queue_size === 0 && !data.is_running && data.processed_count > 0);
+                
+                // 정상적인 응답인 경우 UI 업데이트
+                updateStatusUI(data);
+                
+                // 총 작업 수 자동 조정 (이전에 알 수 없었던 경우)
+                if (!totalTasksFixed && data.processed_count > 0) {
+                    const currentTotal = data.processed_count + data.queue_size;
+                    if (currentTotal > totalTasks) {
+                        totalTasks = currentTotal;
+                        console.log(`총 작업 수 자동 조정: ${totalTasks}`);
+                    }
+                }
+                
+                // 작업이 완료되면 상태 확인 중지
+                if (isReallyCompleted) {
+                    console.log('작업 완료 감지: 모든 작업 처리됨');
+                    
+                    // 완료 상태 확인 이후 2초 후에 상태 확인 중지
+                    setTimeout(function() {
+                        if (statusCheckInterval) {
+                            clearInterval(statusCheckInterval);
+                            statusCheckInterval = null;
+                            console.log('백그라운드 상태 확인 중지: 작업 완료됨');
+                        }
+                    }, 2000);
+                }
+            } else {
+                console.error('API 응답에 필요한 필드가 없음:', data);
+            }
+        })
+        .catch(error => {
+            console.error('백그라운드 상태 확인 오류:', error);
+            // 오류 발생 시 상태 표시를 '오류'로 변경
+            const statusElement = document.getElementById('workerStatus');
+            if (statusElement) {
+                statusElement.className = 'badge bg-danger';
+                statusElement.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> 상태 확인 오류';
+            }
+        });
+}
+
+// 상태 UI 업데이트
+function updateStatusUI(data) {
+    // 디버깅: API 응답 로깅
+    console.log('Background status API response:', data);
+    
+    const statusElement = document.getElementById('workerStatus');
+    const queueSizeElement = document.getElementById('queueSize');
+    const processedElement = document.getElementById('processedCount');
+    const progressBar = document.getElementById('progressBar');
+    const lastUpdatedElement = document.getElementById('lastUpdated');
+    
+    // 큐 크기와 처리된 작업 수 업데이트
+    queueSizeElement.textContent = data.queue_size;
+    processedElement.textContent = data.processed_count;
+    
+    // 진정한 완료 상태 평가
+    const isReallyCompleted = data.is_completed === true || 
+                            (data.queue_size === 0 && !data.is_running && data.processed_count > 0);
+    
+    // 프로그레스 바 업데이트 로직
+    // 총 작업 수 자동 조정 (처리된 작업 + 대기 작업이 더 많을 경우)
+    if (totalTasks > 0) {
+        const currentTotal = data.processed_count + data.queue_size;
+        if (!totalTasksFixed && currentTotal > totalTasks) {
+            totalTasks = currentTotal;
+            console.log(`총 작업 수 조정됨: ${totalTasks}`);
+        }
+        
+        // 진행률 계산 
+        let progressPercent = 0;
+        
+        // 작업이 완료된 경우
+        if (isReallyCompleted) {
+            // 모든 작업이 완료된 것으로 간주
+            progressPercent = 100;
+            
+            // 작업이 완료되었으므로 완료 상태로 표시
+            statusElement.className = 'badge bg-primary';
+            statusElement.innerHTML = '<i class="fas fa-check-circle me-1"></i> 완료됨';
+            console.log('Status updated to COMPLETED (all tasks processed)');
+            
+            // 프로그레스 바를 완료 상태로 설정
+            progressBar.classList.remove('progress-bar-animated');
+            progressBar.classList.remove('bg-info');
+            progressBar.classList.add('bg-success');
+        } else if (data.is_running === true) {
+            // 작업이 진행 중인 경우
+            // 대기열에 작업이 없고 처리된 작업이 있으면 99%까지만 표시
+            if (data.queue_size === 0 && data.processed_count > 0) {
+                progressPercent = 99; // 마지막 작업 처리 중 - 99%
+            } else {
+                // 정확한 진행률 계산 (최대 95%까지만 표시)
+                progressPercent = Math.min(95, Math.round((data.processed_count / totalTasks) * 100));
+            }
+            
+            // 진행 중임을 표시
+            statusElement.className = 'badge bg-success';
+            statusElement.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> 실행 중';
+            console.log(`Status RUNNING - Progress: ${progressPercent}%`);
+            
+            // 진행 중인 프로그레스 바 스타일 설정
+            progressBar.classList.add('progress-bar-animated');
+            progressBar.classList.add('bg-info');
+            progressBar.classList.remove('bg-success');
+        } else {
+            // 대기 중인 경우
+            // 대기열에 작업이 없고 처리된 작업이 있으면 99%
+            if (data.queue_size === 0 && data.processed_count > 0) {
+                progressPercent = 99;
+            } else {
+                // 그 외의 경우 실제 진행률 계산
+                progressPercent = Math.min(95, Math.round((data.processed_count / totalTasks) * 100));
+            }
+            
+            statusElement.className = 'badge bg-secondary';
+            statusElement.innerHTML = '<i class="fas fa-pause me-1"></i> 대기 중';
+            console.log('Status updated to IDLE');
+            
+            // 대기 중 프로그레스 바 스타일 설정
+            progressBar.classList.remove('progress-bar-animated');
+            progressBar.classList.add('bg-info');
+            progressBar.classList.remove('bg-success');
+        }
+        
+        // 프로그레스 바 업데이트
+        progressBar.style.width = `${progressPercent}%`;
+        progressBar.textContent = `${progressPercent}%`;
+        
+        // 디버깅: 진행률 계산 로그
+        console.log(`진행률: ${progressPercent}% (완료: ${data.processed_count}/${totalTasks}, 대기: ${data.queue_size})`);
+    }
+    
+    // 마지막 업데이트 시간
+    lastUpdatedElement.textContent = `마지막 업데이트: ${data.timestamp}`;
+    
+    // 정보 메시지 업데이트
+    const infoMessage = document.querySelector('#backgroundStatus .mt-3.small.text-muted');
+    if (infoMessage) {
+        if (isReallyCompleted) {
+            infoMessage.innerHTML = '모든 백그라운드 작업이 완료되었습니다.';
+        } else if (data.is_running === true) {
+            infoMessage.innerHTML = '백그라운드 작업이 진행 중입니다. 이 창을 닫아도 작업은 계속 진행됩니다.';
+        } else {
+            infoMessage.innerHTML = '백그라운드 작업이 대기 중입니다.';
+        }
+    }
+    
+    // 작업이 완료되었을 때 완료 메시지 표시
+    if (isReallyCompleted && statusCheckInterval) {
+        // 완료 메시지 표시
+        const statusPanel = document.getElementById('backgroundStatus');
+        const statusBody = statusPanel.querySelector('.card-body');
+        
+        // 기존에 완료 메시지가 없으면 추가
+        if (!document.getElementById('completionMessage')) {
+            const completionMessage = document.createElement('div');
+            completionMessage.id = 'completionMessage';
+            completionMessage.className = 'alert alert-success mt-3';
+            completionMessage.innerHTML = '<i class="fas fa-check-circle me-2"></i>모든 테스트가 완료되었습니다!';
+            statusBody.appendChild(completionMessage);
+        }
+        
+        // 잠시 후 자동으로 상태 체크 중지
+        setTimeout(function() {
+            clearInterval(statusCheckInterval);
+            statusCheckInterval = null;
+            console.log('백그라운드 상태 확인 자동 중지: 모든 작업 완료');
+        }, 2000);
+    }
+}
+
 // 페이지 로드 시 실행
 document.addEventListener('DOMContentLoaded', function() {
     // 테스트 케이스를 그룹화합니다
@@ -761,6 +1156,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 선택된 항목 개수 초기화
     updateSelectedCount();
+    
+    // 백그라운드 실행 체크박스 이벤트 설정
+    setupRunAsyncCheckbox();
+    
+    // 백그라운드 상태 확인 설정
+    setupBackgroundStatusCheck();
     
     // 부트스트랩 툴팁 초기화
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');

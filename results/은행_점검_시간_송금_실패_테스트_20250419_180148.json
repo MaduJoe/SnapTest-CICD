@@ -1,0 +1,19 @@
+{
+  "test_case": {
+    "name": "은행 점검 시간 송금 실패 테스트",
+    "description": "은행 점검 시간 동안 송금 시 실패 메시지 팝업창이 발생하는지 확인하는 테스트",
+    "test_function": "bank_maintenance_transfer_failure_popup_test",
+    "parameters": {
+      "is_maintenance": "True",
+      "transfer_amount": "1000",
+      "expected_message": "은행 점검 중입니다. 잠시 후 다시 시도해주세요."
+    }
+  },
+  "result": {
+    "status": "FAIL",
+    "result": "",
+    "error": "name 'popup_message' is not defined"
+  },
+  "execution_time": "0.0154",
+  "timestamp": "2025-04-19 18:01:48.304163"
+}
