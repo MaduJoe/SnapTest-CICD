@@ -1,6 +1,10 @@
 name: Test Automation
 
 on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -11,14 +15,84 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
     
-    - name: Create reports directory and sample file
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
       run: |
-        mkdir -p reports
-        echo "Test report" > reports/test.txt
+        python -m pip install --upgrade pip
+        pip install flask pytest pytest-html
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Create necessary directories and files
+      run: |
+        mkdir -p cases reports tests
+        touch tests/__init__.py
+        
+        # Create test cases
+        echo '{
+          "name": "덧셈 테스트",
+          "description": "두 숫자 덧셈을 테스트합니다",
+          "test_function": "add_test",
+          "parameters": {
+            "a": 5,
+            "b": 3,
+            "expected": 8
+          }
+        }' > cases/addition_test.json
+        
+        echo '{
+          "name": "곱셈 테스트",
+          "description": "두 숫자 곱셈을 테스트합니다",
+          "test_function": "multiply_test",
+          "parameters": {
+            "a": 4,
+            "b": 5,
+            "expected": 20
+          }
+        }' > cases/multiplication_test.json
+    
+    - name: Copy test functions
+      run: |
+        cp tests/functions.py tests/functions.py.bak || true
+        cp $GITHUB_WORKSPACE/tests/functions.py tests/functions.py || echo "No test functions file found, using simplified test functions"
+        if [ ! -f tests/functions.py ]; then
+          cat > tests/functions.py << EOF
+def add_test(a, b, expected=None):
+    """두 숫자를 더하는 테스트"""
+    result = a + b
+    if expected is not None and result != expected:
+        return {"status": "FAIL", "error": "Expected " + str(expected) + " but got " + str(result)}
+    return {"status": "PASS", "result": str(result)}
+
+def multiply_test(a, b, expected=None):
+    """두 숫자를 곱하는 테스트"""
+    result = a * b
+    if expected is not None and result != expected:
+        return {"status": "FAIL", "error": "Expected " + str(expected) + " but got " + str(result)}
+    return {"status": "PASS", "result": str(result)}
+EOF
+        fi
+    
+    - name: Run tests
+      run: python run_tests.py
+    
+    - name: Debug reports directory
+      run: |
+        echo "Contents of reports directory:"
         ls -la reports/
     
     - name: Upload test results
       uses: actions/upload-artifact@v4
       with:
         name: test-results
-        path: reports/ 
+        path: reports/
+        if-no-files-found: warn
+    
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: reports/test_report.xml 

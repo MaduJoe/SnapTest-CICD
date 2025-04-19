@@ -3,6 +3,7 @@ import json
 import sys
 from datetime import datetime
 import importlib
+import xml.etree.ElementTree as ET
 
 def run_test_case(filename):
     """테스트 케이스 파일을 실행하고 결과를 반환합니다."""
@@ -77,8 +78,48 @@ def main():
 
     print(f'Test report saved to {report_file}')
 
+    # XML 보고서 생성
+    generate_xml_report(results)
+    
     # HTML 보고서 생성
     generate_html_report(results)
+
+def generate_xml_report(results):
+    """XML 형식의 테스트 결과 보고서를 생성합니다."""
+    # XML 루트 요소 생성
+    test_suite = ET.Element('testsuite')
+    test_suite.set('name', 'TestAutomation')
+    test_suite.set('tests', str(len(results)))
+    test_suite.set('errors', str(sum(1 for r in results if r['result'].get('status') == 'ERROR')))
+    test_suite.set('failures', str(sum(1 for r in results if r['result'].get('status') == 'FAIL')))
+    test_suite.set('skipped', '0')
+    test_suite.set('timestamp', datetime.now().isoformat())
+    
+    for result in results:
+        test_case_name = result['test_case'].get('name', 'Unknown')
+        test_function = result['test_case'].get('test_function', 'Unknown')
+        status = result['result'].get('status', 'UNKNOWN')
+        
+        test_case = ET.SubElement(test_suite, 'testcase')
+        test_case.set('name', test_case_name)
+        test_case.set('classname', test_function)
+        test_case.set('time', str(result.get('duration', 0)))
+        
+        if status == 'FAIL':
+            failure = ET.SubElement(test_case, 'failure')
+            failure.set('message', result['result'].get('error', 'Test failed'))
+            failure.text = str(result['result'])
+        elif status == 'ERROR':
+            error = ET.SubElement(test_case, 'error')
+            error.set('message', result['result'].get('error', 'Test error'))
+            error.text = str(result['result'])
+    
+    # XML 파일 저장
+    tree = ET.ElementTree(test_suite)
+    xml_report = os.path.join('reports', 'test_report.xml')
+    tree.write(xml_report, encoding='utf-8', xml_declaration=True)
+    
+    print(f'XML report generated: {xml_report}')
 
 def generate_html_report(results):
     html = f"""
