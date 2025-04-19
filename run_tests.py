@@ -246,4 +246,5 @@ def ci_reports():
         return error_msg, 500
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    # app.py와 포트 충돌을 피하기 위해 다른 포트(5001) 사용
+    app.run(debug=True, port=5001) 
