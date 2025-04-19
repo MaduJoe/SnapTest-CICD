@@ -56,7 +56,7 @@ jobs:
     
     - name: Create test functions
       run: |
-        echo 'def add_test(a, b, expected=None):
+def add_test(a, b, expected=None):
     # 두 숫자를 더하는 테스트
     result = a + b
     if expected is not None and result != expected:
