@@ -1,20 +1,23 @@
 # tests/functions.py
 import time
 
-def add_test(a, b, expected):
-    time.sleep(3)  # 1초 대기
-    print(f"Adding {a} + {b}")
+def add_test(a, b, expected=None):
+    """
+    두 숫자를 더하는 테스트
+    """
     result = a + b
-    print(f"Result: {result}")
-    assert result == expected, f"Expected {expected}, got {result}"
-    return {"result": result, "status": "PASS"}
+    if expected is not None and result != expected:
+        return {"status": "FAIL", "error": "Expected " + str(expected) + " but got " + str(result)}
+    return {"status": "PASS", "result": str(result)}
 
-def multiply_test(a, b, expected):
-    print(f"Multiplying {a} * {b}")
+def multiply_test(a, b, expected=None):
+    """
+    두 숫자를 곱하는 테스트
+    """
     result = a * b
-    print(f"Result: {result}")
-    assert result == expected, f"Expected {expected}, got {result}"
-    return {"result": result, "status": "PASS"}
+    if expected is not None and result != expected:
+        return {"status": "FAIL", "error": "Expected " + str(expected) + " but got " + str(result)}
+    return {"status": "PASS", "result": str(result)}
 
 def divide_test(a, b, expected):
     print(f"Dividing {a} / {b}")
