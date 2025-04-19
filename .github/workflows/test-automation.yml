@@ -12,32 +12,27 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+        python-version: '3.10'
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        # 필요한 기본 패키지 설치
         pip install flask pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     
-    - name: Debug file structure
+    - name: Create necessary directories and files
       run: |
-        echo "Current directory structure:"
-        ls -la
-        echo "Creating necessary directories if they don't exist"
         mkdir -p cases reports tests
+        # Create __init__.py
         touch tests/__init__.py
         
-        # 기본 테스트 함수 생성
-        if [ ! -f tests/functions.py ]; then
-          echo "Creating basic test functions file"
-          cat > tests/functions.py << 'EOF'
+        # Create basic test functions 
+        cat > tests/functions.py << 'EOF'
 def add_test(a, b, expected=None):
     """
     두 숫자를 더하는 테스트
@@ -55,33 +50,10 @@ def multiply_test(a, b, expected=None):
     if expected is not None and result != expected:
         return {"status": "FAIL", "error": f"Expected {expected} but got {result}"}
     return {"status": "PASS", "result": str(result)}
-
-def divide_test(a, b, expected=None):
-    """
-    두 숫자를 나누는 테스트
-    """
-    if b == 0:
-        return {"status": "FAIL", "error": "division by zero"}
-    result = a / b
-    if expected is not None and result != expected:
-        return {"status": "FAIL", "error": f"Expected {expected} but got {result}"}
-    return {"status": "PASS", "result": str(result)}
-
-def string_concat_test(str1, str2, expected=None):
-    """
-    두 문자열을 연결하는 테스트
-    """
-    result = str1 + str2
-    if expected is not None and result != expected:
-        return {"status": "FAIL", "error": f"Expected {expected} but got {result}"}
-    return {"status": "PASS", "result": result}
 EOF
-        fi
         
-        # 샘플 테스트 케이스 생성
-        if [ ! -f cases/sample_test.json ]; then
-          echo "Creating sample test case"
-          cat > cases/sample_test.json << 'EOF'
+        # Create sample test case
+        cat > cases/addition_test.json << 'EOF'
 {
   "name": "덧셈 테스트",
   "description": "두 숫자 덧셈을 테스트합니다",
@@ -93,17 +65,26 @@ EOF
   }
 }
 EOF
-        fi
-    
-    - name: Create runner module
-      run: |
-        if [ ! -f runner.py ]; then
-          echo "Creating runner module"
-          cat > runner.py << 'EOF'
+        
+        # Create sample test case
+        cat > cases/multiplication_test.json << 'EOF'
+{
+  "name": "곱셈 테스트",
+  "description": "두 숫자 곱셈을 테스트합니다",
+  "test_function": "multiply_test",
+  "parameters": {
+    "a": 4,
+    "b": 5,
+    "expected": 20
+  }
+}
+EOF
+        
+        # Create runner script
+        cat > runner.py << 'EOF'
 import os
 import json
 import importlib
-import sys
 from datetime import datetime
 
 def run_test_case(filename):
@@ -142,190 +123,157 @@ def run_test_case(filename):
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
 EOF
-        fi
+        
+        # Create test runner script
+        cat > run_tests.py << 'EOF'
+import os
+import json
+import sys
+from datetime import datetime
+from runner import run_test_case
+
+# 테스트 결과 디렉토리 생성
+os.makedirs('reports', exist_ok=True)
+
+# 테스트 케이스 목록 로드
+cases = []
+if os.path.exists('cases'):
+    for filename in os.listdir('cases'):
+        if filename.endswith('.json'):
+            try:
+                with open(os.path.join('cases', filename), 'r', encoding='utf-8') as f:
+                    case = json.load(f)
+                    case['filename'] = filename
+                    cases.append(case)
+            except Exception as e:
+                print(f'Error reading file {filename}: {str(e)}')
+else:
+    print('Cases directory not found')
     
-    - name: Run test cases
+print(f'Found {len(cases)} test cases')
+
+# 테스트 실행
+results = []
+for case in cases:
+    print(f'Running test case: {case.get("name", "Unknown")}')
+    result = run_test_case(case['filename'])
+    results.append(result)
+    print(f'Test result: {result["result"]["status"]}')
+
+# 결과 저장
+timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+report_file = f'reports/test_report_{timestamp}.json'
+with open(report_file, 'w', encoding='utf-8') as f:
+    json.dump(results, f, indent=2, ensure_ascii=False)
+
+print(f'Test report saved to {report_file}')
+
+# HTML 보고서 생성
+html = f'''
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Automation Report</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; padding: 20px; }}
+        .header {{ margin-bottom: 20px; }}
+        .pass {{ color: green; }}
+        .fail {{ color: red; }}
+        .summary {{ margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 5px; }}
+        table {{ border-collapse: collapse; width: 100%; }}
+        th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+        th {{ background-color: #f2f2f2; }}
+        tr:nth-child(even) {{ background-color: #f9f9f9; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Test Automation Report</h1>
+        <p>Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+    </div>
+    
+    <div class="summary">
+        <h3>Summary</h3>
+        <p>Total Tests: {len(results)}</p>
+        <p>Passed: <span class="pass">{sum(1 for r in results if r['result']['status'] == 'PASS')}</span></p>
+        <p>Failed: <span class="fail">{sum(1 for r in results if r['result']['status'] in ['FAIL', 'ERROR'])}</span></p>
+        <p>Success Rate: {sum(1 for r in results if r['result']['status'] == 'PASS') / len(results) * 100 if results else 0:.2f}%</p>
+    </div>
+    
+    <h3>Test Results</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Test Case</th>
+                <th>Function</th>
+                <th>Status</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+'''
+
+for result in results:
+    test_case_name = result['test_case'].get('name', 'Unknown')
+    test_function = result['test_case'].get('test_function', 'Unknown')
+    status = result['result']['status']
+    status_class = 'pass' if status == 'PASS' else 'fail'
+    details = result['result'].get('result', '') or result['result'].get('error', '')
+    
+    html += f'''
+        <tr>
+            <td>{test_case_name}</td>
+            <td>{test_function}</td>
+            <td class="{status_class}">{status}</td>
+            <td>{details}</td>
+        </tr>
+    '''
+
+html += '''
+        </tbody>
+    </table>
+</body>
+</html>
+'''
+
+# HTML 파일 저장
+html_report = os.path.join('reports', 'test_report.html')
+with open(html_report, 'w', encoding='utf-8') as f:
+    f.write(html)
+
+print(f'HTML report generated: {html_report}')
+
+# 요약 출력
+pass_count = sum(1 for r in results if r['result']['status'] == 'PASS')
+fail_count = sum(1 for r in results if r['result']['status'] == 'FAIL' or r['result']['status'] == 'ERROR')
+total_count = len(results)
+
+print(f'\nTest Summary:')
+print(f'Total Tests: {total_count}')
+print(f'Passed: {pass_count}')
+print(f'Failed/Errors: {fail_count}')
+if total_count > 0:
+    success_rate = pass_count/total_count*100
+    print(f'Success Rate: {success_rate:.2f}%')
+else:
+    print('Success Rate: N/A')
+EOF
+        
+        # Create simple HTML report for test
+        echo "<html><body><h1>Test Report</h1><p>This is a sample test report</p></body></html>" > reports/test_report.html
+        echo '{"sample": "test"}' > reports/test_report_sample.json
+    
+    - name: Run tests
+      run: python run_tests.py
+    
+    - name: Debug reports directory
       run: |
-        python -c "
-        import os, json, sys
-        from datetime import datetime
-        sys.path.append('.')
-        
-        # 테스트 결과 디렉토리 생성
-        os.makedirs('reports', exist_ok=True)
-        
-        # 테스트 케이스 목록 로드
-        cases = []
-        if os.path.exists('cases'):
-            for filename in os.listdir('cases'):
-                if filename.endswith('.json'):
-                    try:
-                        with open(os.path.join('cases', filename), 'r', encoding='utf-8') as f:
-                            case = json.load(f)
-                            case['filename'] = filename
-                            cases.append(case)
-                    except Exception as e:
-                        print(f'Error reading file {filename}: {str(e)}')
-        else:
-            print('Cases directory not found')
-            
-        print(f'Found {len(cases)} test cases')
-        
-        # 테스트 실행
-        from runner import run_test_case
-        
-        results = []
-        for case in cases:
-            print(f'Running test case: {case.get(\"name\", \"Unknown\")}')
-            result = run_test_case(case['filename'])
-            results.append(result)
-            print(f'Test result: {result[\"result\"][\"status\"]}')
-        
-        # 결과 저장
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        report_file = f'reports/test_report_{timestamp}.json'
-        with open(report_file, 'w', encoding='utf-8') as f:
-            json.dump(results, f, indent=2, ensure_ascii=False)
-        
-        print(f'Test report saved to {report_file}')
-        
-        # 요약 출력
-        pass_count = sum(1 for r in results if r['result']['status'] == 'PASS')
-        fail_count = sum(1 for r in results if r['result']['status'] == 'FAIL')
-        error_count = sum(1 for r in results if r['result']['status'] == 'ERROR')
-        total_count = len(results)
-        
-        print(f'\\nTest Summary:')
-        print(f'Total Tests: {total_count}')
-        print(f'Passed: {pass_count}')
-        print(f'Failed: {fail_count}')
-        print(f'Errors: {error_count}')
-        if total_count > 0:
-            success_rate = pass_count/total_count*100
-            print(f'Success Rate: {success_rate:.2f}%')
-        else:
-            print('Success Rate: N/A')
-        
-        # 실패한 테스트가 있어도 워크플로우를 성공으로 간주
-        sys.exit(0)
-        "
+        echo "Contents of reports directory:"
+        ls -la reports/
     
     - name: Upload test results
-      if: always()  # 테스트 실패해도 결과는 업로드
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: test-results
         path: reports/
-        
-    - name: Generate HTML report
-      if: always()
-      run: |
-        python -c "
-        import os, json, sys
-        from datetime import datetime
-        sys.path.append('.')
-        
-        # 가장 최근 테스트 보고서 찾기
-        latest_report = None
-        if os.path.exists('reports'):
-            reports = [f for f in os.listdir('reports') if f.startswith('test_report_') and f.endswith('.json')]
-            if reports:
-                latest_report = sorted(reports, reverse=True)[0]
-        
-        if not latest_report:
-            print('No test reports found')
-            with open('reports/test_report.html', 'w') as f:
-                f.write('<html><body><h1>No test reports found</h1></body></html>')
-            sys.exit(0)
-        
-        # HTML 보고서 생성
-        with open(os.path.join('reports', latest_report), 'r', encoding='utf-8') as f:
-            results = json.load(f)
-        
-        html = '''
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Test Automation Report</title>
-            <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; }
-                .header { margin-bottom: 20px; }
-                .pass { color: green; }
-                .fail { color: red; }
-                .summary { margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 5px; }
-            </style>
-        </head>
-        <body>
-            <div class=\"container\">
-                <div class=\"header\">
-                    <h1>Test Automation Report</h1>
-                    <p>Generated on: %s</p>
-                </div>
-                
-                <div class=\"summary\">
-                    <h3>Summary</h3>
-                    <p>Total Tests: %d</p>
-                    <p>Passed: <span class=\"pass\">%d</span></p>
-                    <p>Failed: <span class=\"fail\">%d</span></p>
-                    <p>Success Rate: %.2f%%</p>
-                </div>
-                
-                <h3>Test Results</h3>
-                <table class=\"table table-striped\">
-                    <thead>
-                        <tr>
-                            <th>Test Case</th>
-                            <th>Function</th>
-                            <th>Status</th>
-                            <th>Details</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        ''' % (
-            datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            len(results),
-            sum(1 for r in results if r['result']['status'] == 'PASS'),
-            sum(1 for r in results if r['result']['status'] in ['FAIL', 'ERROR']),
-            sum(1 for r in results if r['result']['status'] == 'PASS') / len(results) * 100 if results else 0
-        )
-        
-        for result in results:
-            test_case_name = result['test_case'].get('name', 'Unknown')
-            test_function = result['test_case'].get('test_function', 'Unknown')
-            status = result['result']['status']
-            status_class = 'pass' if status == 'PASS' else 'fail'
-            details = result['result'].get('result', '') or result['result'].get('error', '')
-            
-            html += f'''
-                <tr>
-                    <td>{test_case_name}</td>
-                    <td>{test_function}</td>
-                    <td class=\"{status_class}\">{status}</td>
-                    <td>{details}</td>
-                </tr>
-            '''
-        
-        html += '''
-                    </tbody>
-                </table>
-            </div>
-            <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js\"></script>
-        </body>
-        </html>
-        '''
-        
-        # HTML 파일 저장
-        html_report = os.path.join('reports', 'test_report.html')
-        with open(html_report, 'w', encoding='utf-8') as f:
-            f.write(html)
-        
-        print(f'HTML report generated: {html_report}')
-        "
-    
-    - name: Upload HTML report
-      if: always()
-      uses: actions/upload-artifact@v2
-      with:
-        name: html-report
-        path: reports/test_report.html 
+        if-no-files-found: warn 
