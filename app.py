@@ -480,46 +480,137 @@ def api_reports():
 @app.route('/ci_reports')
 def ci_reports():
     """GitHub Actions 테스트 실행 결과 목록을 표시합니다."""
-    reports = []
     
-    # reports 디렉토리가 존재하면 파일 목록을 가져옵니다
-    if os.path.exists('reports'):
-        json_files = [f for f in os.listdir('reports') if f.startswith('test_report_') and f.endswith('.json')]
+    # GitHub API를 통해 워크플로우 실행 결과 가져오기
+    repo = "MaduJoe/SnapTest-CICD"  # 적절히 변경
+    token = os.environ.get("GITHUB_TOKEN", "")
+    
+    print(f"Fetching workflow runs from GitHub API")
+    print(f"Using authentication: {'Yes' if token else 'No'}")
+    
+    url = f"https://api.github.com/repos/{repo}/actions/runs"
+    headers = {"Authorization": f"token {token}"} if token else {}
+    
+    try:
+        import requests
+        response = requests.get(url, headers=headers)
+        print(f"API Response status: {response.status_code}")
         
-        # 최신 파일부터 정렬
-        json_files.sort(reverse=True)
-        
-        for idx, filename in enumerate(json_files):
+        workflows = []
+        if response.status_code == 200:
+            data = response.json()
+            print(f"Total workflow runs found: {len(data.get('workflow_runs', []))}")
+            workflows = data.get("workflow_runs", [])
+            
+            # 디버깅을 위해 첫 번째 워크플로우 실행의 일부 정보 출력
+            if workflows:
+                first_run = workflows[0]
+                print(f"First workflow: {first_run.get('name')} (ID: {first_run.get('id')})")
+                print(f"Status: {first_run.get('status')}, Conclusion: {first_run.get('conclusion')}")
+            
+            return render_template('ci_reports.html', workflows=workflows, github_repo=repo)
+        else:
+            error_msg = f"Error fetching data: {response.status_code}"
+            if response.status_code == 401:
+                error_msg += " - Authorization failed. Check your token."
+            elif response.status_code == 404:
+                error_msg += f" - Repository '{repo}' not found or you don't have access."
+            
+            print(error_msg)
             try:
-                with open(os.path.join('reports', filename), 'r', encoding='utf-8') as f:
-                    results = json.load(f)
-                    
-                    # 파일명에서 타임스탬프 추출
-                    timestamp = filename.replace('test_report_', '').replace('.json', '')
-                    formatted_timestamp = f"{timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]} {timestamp[9:11]}:{timestamp[11:13]}:{timestamp[13:15]}"
-                    
-                    # 통계 계산
-                    total_tests = len(results)
-                    pass_count = sum(1 for r in results if r['result']['status'] == 'PASS')
-                    fail_count = total_tests - pass_count
-                    success_rate = round((pass_count / total_tests * 100) if total_tests > 0 else 0, 2)
-                    
-                    reports.append({
-                        'id': idx + 1,
-                        'filename': filename,
-                        'timestamp': formatted_timestamp,
-                        'total_tests': total_tests,
-                        'pass_count': pass_count,
-                        'fail_count': fail_count,
-                        'success_rate': success_rate
-                    })
-            except Exception as e:
-                print(f"Error processing CI report {filename}: {str(e)}")
+                print(f"Error response: {response.json()}")
+            except:
+                print("Could not parse error response as JSON")
+                
+            # API 호출에 실패한 경우 로컬 파일 기반 보고서로 대체
+            reports = []
+            
+            # reports 디렉토리가 존재하면 파일 목록을 가져옵니다
+            if os.path.exists('reports'):
+                json_files = [f for f in os.listdir('reports') if f.startswith('test_report_') and f.endswith('.json')]
+                
+                # 최신 파일부터 정렬
+                json_files.sort(reverse=True)
+                
+                for idx, filename in enumerate(json_files):
+                    try:
+                        with open(os.path.join('reports', filename), 'r', encoding='utf-8') as f:
+                            results = json.load(f)
+                            
+                            # 파일명에서 타임스탬프 추출
+                            timestamp = filename.replace('test_report_', '').replace('.json', '')
+                            formatted_timestamp = f"{timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]} {timestamp[9:11]}:{timestamp[11:13]}:{timestamp[13:15]}"
+                            
+                            # 통계 계산
+                            total_tests = len(results)
+                            pass_count = sum(1 for r in results if r['result']['status'] == 'PASS')
+                            fail_count = total_tests - pass_count
+                            success_rate = round((pass_count / total_tests * 100) if total_tests > 0 else 0, 2)
+                            
+                            reports.append({
+                                'id': idx + 1,
+                                'filename': filename,
+                                'timestamp': formatted_timestamp,
+                                'total_tests': total_tests,
+                                'pass_count': pass_count,
+                                'fail_count': fail_count,
+                                'success_rate': success_rate
+                            })
+                    except Exception as e:
+                        print(f"Error processing CI report {filename}: {str(e)}")
+            
+            # GitHub 저장소 정보 (있는 경우)
+            github_repo = os.getenv('GITHUB_REPOSITORY', repo)
+            
+            # 에러 메시지와 함께 기존 템플릿 사용
+            flash(error_msg, 'error')
+            return render_template('ci_reports.html', reports=reports, github_repo=github_repo, workflows=[])
     
-    # GitHub 저장소 정보 (있는 경우)
-    github_repo = os.getenv('GITHUB_REPOSITORY', 'your-username/your-repo')
-    
-    return render_template('ci_reports.html', reports=reports, github_repo=github_repo)
+    except Exception as e:
+        print(f"Error in ci_reports route: {str(e)}")
+        flash(f"GitHub API 호출 중 오류가 발생했습니다: {str(e)}", "error")
+        
+        # 오류 발생 시 로컬 파일 기반 보고서로 대체
+        reports = []
+        
+        # reports 디렉토리가 존재하면 파일 목록을 가져옵니다
+        if os.path.exists('reports'):
+            json_files = [f for f in os.listdir('reports') if f.startswith('test_report_') and f.endswith('.json')]
+            
+            # 최신 파일부터 정렬
+            json_files.sort(reverse=True)
+            
+            for idx, filename in enumerate(json_files):
+                try:
+                    with open(os.path.join('reports', filename), 'r', encoding='utf-8') as f:
+                        results = json.load(f)
+                        
+                        # 파일명에서 타임스탬프 추출
+                        timestamp = filename.replace('test_report_', '').replace('.json', '')
+                        formatted_timestamp = f"{timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]} {timestamp[9:11]}:{timestamp[11:13]}:{timestamp[13:15]}"
+                        
+                        # 통계 계산
+                        total_tests = len(results)
+                        pass_count = sum(1 for r in results if r['result']['status'] == 'PASS')
+                        fail_count = total_tests - pass_count
+                        success_rate = round((pass_count / total_tests * 100) if total_tests > 0 else 0, 2)
+                        
+                        reports.append({
+                            'id': idx + 1,
+                            'filename': filename,
+                            'timestamp': formatted_timestamp,
+                            'total_tests': total_tests,
+                            'pass_count': pass_count,
+                            'fail_count': fail_count,
+                            'success_rate': success_rate
+                        })
+                except Exception as e:
+                    print(f"Error processing CI report {filename}: {str(e)}")
+        
+        # GitHub 저장소 정보 (있는 경우)
+        github_repo = os.getenv('GITHUB_REPOSITORY', repo)
+        
+        return render_template('ci_reports.html', reports=reports, github_repo=github_repo, workflows=[])
 
 @app.route('/ci_reports/<int:report_id>')
 def view_ci_report(report_id):

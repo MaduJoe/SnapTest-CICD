@@ -79,6 +79,46 @@
             padding: 40px;
             color: #586069;
         }
+        .section-title {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e1e4e8;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .report-table th, .report-table td {
+            border: 1px solid #e1e4e8;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .report-table th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+        .report-table tr:nth-child(even) {
+            background-color: #f6f8fa;
+        }
+        .home-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #0366d6;
+            text-decoration: none;
+        }
+        .home-link:hover {
+            text-decoration: underline;
+        }
+        .flash-message {
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+        }
     </style>
 </head>
 <body>
@@ -87,7 +127,18 @@
         <p>Showing the latest workflow runs from GitHub Actions</p>
     </div>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     {% if workflows %}
+    <h2 class="section-title">GitHub Actions Workflows</h2>
     <ul class="workflow-list">
         {% for workflow in workflows %}
         <li class="workflow-item">
@@ -129,12 +180,49 @@
         </li>
         {% endfor %}
     </ul>
-    {% else %}
+    {% endif %}
+
+    {% if reports %}
+    <h2 class="section-title">Local Test Reports</h2>
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Timestamp</th>
+                <th>Tests</th>
+                <th>Pass</th>
+                <th>Fail</th>
+                <th>Success Rate</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ report.id }}</td>
+                <td>{{ report.timestamp }}</td>
+                <td>{{ report.total_tests }}</td>
+                <td>{{ report.pass_count }}</td>
+                <td>{{ report.fail_count }}</td>
+                <td>{{ report.success_rate }}%</td>
+                <td>
+                    <a href="{{ url_for('view_ci_report', report_id=report.id) }}" class="workflow-link">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if not workflows and not reports %}
     <div class="empty-state">
-        <h2>No workflow runs found</h2>
-        <p>There are no CI/CD workflow runs available or your token may not have sufficient permissions.</p>
-        <p>Make sure you have set the GITHUB_TOKEN environment variable and it has the correct permissions.</p>
+        <h2>No test results found</h2>
+        <p>There are no CI/CD workflow runs or test reports available.</p>
+        <p>Make sure you have set the GITHUB_TOKEN environment variable if you want to see GitHub Actions workflows.</p>
+        <p>If you're looking for local test reports, check that tests have been run and reports have been generated.</p>
     </div>
     {% endif %}
+
+    <a href="{{ url_for('index') }}" class="home-link">← Back to Home</a>
 </body>
 </html> 
