@@ -1,24 +1,48 @@
 # 📊 SnapTest: QA 테스트 자동화 플랫폼
 
-SnapTest는 테스트 케이스를 생성, 관리, 실행하고 결과를 실시간으로 시각화할 수 있는 종합적인 QA 테스트 자동화 플랫폼입니다. 사용자 친화적인 웹 인터페이스와 강력한 백엔드 시스템을 통해 테스트 자동화 프로세스를 간소화하고, 실시간 피드백을 제공합니다.
+SnapTest는 테스트 케이스를 생성, 관리, 실행하고 결과를 실시간으로 시각화할 수 있는 종합적인 QA 테스트 자동화 플랫폼입니다.  
+사용자 친화적인 웹 인터페이스와 강력한 백엔드 시스템을 통해 테스트 자동화 프로세스를 간소화하고, 실시간 피드백을 제공합니다.
 
 ![GitHub Actions 워크플로우 상태](https://img.shields.io/badge/GitHub%20Actions-구성완료-brightgreen)
 
+---
+
 ## 🖼️ 스크린샷
 
-### 메인 화면 - 테스트 케이스 관리
-![메인 화면](demo-images/1.인덱스페이지.png)
+### 1. 메인 화면 - 테스트 케이스 관리
 
-### 테스트 케이스 생성
-![테스트 케이스 수동 생성](demo-images/2.1수동생성.png) ![테스트 케이스 AI 자동 생성](demo-images/2.2자동생성.png)
+![메인 화면](demo-images/1.인덱스페이지.png)  
+👉 테스트 케이스의 그룹화, 검색, 필터링 및 배치 실행 지원
 
-### 대시보드 및 시각화
-![대시보드 - 성공/실패 비율](demo-images/3.1대시보드-1.png) 
+---
+
+### 2. 테스트 케이스 생성
+
+| 수동 생성 | AI 자동 생성 |
+|-------------|------------|
+| ![테스트 케이스 수동 생성](demo-images/2.1수동생성.png) | ![테스트 케이스 AI 자동 생성](demo-images/2.2자동생성.png) |
+
+---
+
+### 3. 대시보드 및 시각화
+
+#### 3.1 성공/실패 비율 차트
+![대시보드 - 성공/실패 비율](demo-images/3.1대시보드-1.png)
+
+#### 3.2 테스트 케이스 통계
 ![대시보드 - 테스트 케이스 통계](demo-images/3.2대시보드-2.png)
+
+#### 3.3 테스트 리포트
 ![대시보드 - 테스트 리포트](demo-images/3.3대시보드-3.png)
 
-### CI/CD 통합
-![GitHub Actions 워크플로우](demo-images/4.CICD_Workflow.png)
+---
+
+### 4. CI/CD 통합
+
+![GitHub Actions 워크플로우](demo-images/4.CICD_Workflow.png)  
+👉 GitHub Actions를 통한 자동화된 테스트 실행 및 보고서 생성
+
+---
 
 ## 🚀 주요 기능
 
@@ -80,15 +104,21 @@ SnapTest는 테스트 케이스를 생성, 관리, 실행하고 결과를 실시
   * GitHub Actions 워크플로우 실행 결과 조회
   * 실행 히스토리 및 성공/실패 상태 추적
 
+---
+
 ## 💻 기술 스택
 
-* **백엔드**: Python, Flask, SQLite
-* **프론트엔드**: HTML, CSS, JavaScript, Bootstrap 5
-* **시각화**: Chart.js
-* **비동기 처리**: 백그라운드 워커 및 스케줄러
-* **인공지능**: Google Gemini API
-* **CI/CD**: GitHub Actions
-* **데이터 처리**: JSON 기반 테스트 케이스 저장소
+| 영역 | 기술 |
+|------|------|
+| **백엔드** | Python, Flask, SQLite |
+| **프론트엔드** | HTML, CSS, JavaScript, Bootstrap 5 |
+| **시각화** | Chart.js |
+| **비동기 처리** | 백그라운드 워커 및 스케줄러 |
+| **인공지능** | Google Gemini API |
+| **CI/CD** | GitHub Actions |
+| **데이터 처리** | JSON 기반 테스트 케이스 저장소 |
+
+---
 
 ## 🏗️ 시스템 아키텍처
 
@@ -107,6 +137,8 @@ SnapTest는 테스트 케이스를 생성, 관리, 실행하고 결과를 실시
                                 ↓
                         [테스트 실행기 (runner.py)]
 ```
+
+---
 
 ## 🔍 주요 컴포넌트
 
@@ -142,6 +174,8 @@ SnapTest는 테스트 케이스를 생성, 관리, 실행하고 결과를 실시
 * 테스트 결과 및 통계 데이터 저장
 * 보고서 생성을 위한 쿼리 처리
 
+---
+
 ## 📋 고급 기능
 
 ### 실시간 백그라운드 작업 모니터링
@@ -161,6 +195,8 @@ SnapTest는 테스트 케이스를 생성, 관리, 실행하고 결과를 실시
 * 테스트 함수 선택에 따른 동적 파라미터 폼 생성
 * 파라미터 타입별 적절한 입력 필드 및 검증
 * 사용자 친화적인 오류 메시지 및 가이드
+
+---
 
 ## 🚀 설치 및 실행 방법
 
@@ -212,6 +248,8 @@ SnapTest는 테스트 케이스를 생성, 관리, 실행하고 결과를 실시
    http://localhost:5000
    ```
 
+---
+
 ## 🤝 기여 방법
 
 SnapTest 개발에 기여하고 싶으시다면:
@@ -222,6 +260,8 @@ SnapTest 개발에 기여하고 싶으시다면:
 4. 브랜치에 푸시하세요 (`git push origin feature/amazing-feature`)
 5. Pull Request를 제출하세요
 
+---
+
 ## 📈 향후 개선 계획
 
 - [ ] 테스트 커버리지 리포트 통합
@@ -231,10 +271,21 @@ SnapTest 개발에 기여하고 싶으시다면:
 - [ ] 다중 환경 테스트 및 비교 기능
 - [ ] 팀 협업 기능 및 권한 관리
 
+---
+
 ## 📜 라이선스
 
 이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 
 ---
 
-© 2025.04 조재근 (jaekeunv@gmail.com)
+## 📬 연락처
+
+**재근 조**  
+🔗 [GitHub](https://github.com/yourusername)  
+📧 jaekeunv@gmail.com  
+📁 프로젝트 링크: [github.com/yourusername/snaptest](https://github.com/yourusername/snaptest)
+
+---
+
+© 2024 재근 조 (jaekeunv@gmail.com)
