@@ -54,13 +54,9 @@ jobs:
           }
         }' > cases/multiplication_test.json
     
-    - name: Copy test functions
+    - name: Create test functions
       run: |
-        cp tests/functions.py tests/functions.py.bak || true
-        cp $GITHUB_WORKSPACE/tests/functions.py tests/functions.py || echo "No test functions file found, using simplified test functions"
-        if [ ! -f tests/functions.py ]; then
-          cat > tests/functions.py << EOF
-def add_test(a, b, expected=None):
+        echo 'def add_test(a, b, expected=None):
     """두 숫자를 더하는 테스트"""
     result = a + b
     if expected is not None and result != expected:
@@ -72,9 +68,7 @@ def multiply_test(a, b, expected=None):
     result = a * b
     if expected is not None and result != expected:
         return {"status": "FAIL", "error": "Expected " + str(expected) + " but got " + str(result)}
-    return {"status": "PASS", "result": str(result)}
-EOF
-        fi
+    return {"status": "PASS", "result": str(result)}' > tests/functions.py
     
     - name: Run tests
       run: python run_tests.py
