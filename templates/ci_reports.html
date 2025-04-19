@@ -10,6 +10,7 @@
             color: #24292e;
             max-width: 1200px;
             margin: 0 auto;
+            padding-bottom: 60px; /* 고정 버튼을 위한 하단 여백 추가 */
         }
         .header {
             margin-bottom: 20px;
@@ -102,14 +103,30 @@
         .report-table tr:nth-child(even) {
             background-color: #f6f8fa;
         }
+        .home-link-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
         .home-link {
             display: inline-block;
-            margin-top: 20px;
-            color: #0366d6;
+            background-color: #0366d6;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 30px;
             text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
         .home-link:hover {
-            text-decoration: underline;
+            background-color: #024ea2;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+        .home-link:active {
+            transform: translateY(0);
         }
         .flash-message {
             padding: 10px 15px;
@@ -223,6 +240,8 @@
     </div>
     {% endif %}
 
-    <a href="{{ url_for('index') }}" class="home-link">← Back to Home</a>
+    <div class="home-link-container">
+        <a href="{{ url_for('index') }}" class="home-link">← Back to Home</a>
+    </div>
 </body>
 </html> 
