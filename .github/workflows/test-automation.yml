@@ -53,9 +53,9 @@ jobs:
             "expected": 20
           }
         }' > cases/multiplication_test.json
-    
-    - name: Create test functions
-      run: |
+        
+        # Create simple test functions
+        cat > tests/functions.py << 'EOL'
 def add_test(a, b, expected=None):
     # 두 숫자를 더하는 테스트
     result = a + b
@@ -68,7 +68,8 @@ def multiply_test(a, b, expected=None):
     result = a * b
     if expected is not None and result != expected:
         return {"status": "FAIL", "error": "Expected " + str(expected) + " but got " + str(result)}
-    return {"status": "PASS", "result": str(result)}' > tests/functions.py
+    return {"status": "PASS", "result": str(result)}
+EOL
     
     - name: Run tests
       run: python run_tests.py
