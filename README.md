@@ -237,4 +237,4 @@ SnapTest 개발에 기여하고 싶으시다면:
 
 ---
 
-© 2024 재근 조 (jaekeunv@gmail.com)
+© 2025.04 조재근 (jaekeunv@gmail.com)
