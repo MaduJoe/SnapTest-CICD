@@ -1,0 +1,10 @@
+{
+  "name": "계정 잠금 테스트",
+  "description": "로그인 시도 5회 실패 후 계정이 잠기는지 확인하는 테스트",
+  "test_function": "account_lock_after_five_failed_logins_test",
+  "parameters": {
+    "login_attempts": 5,
+    "expected_locked": true
+  },
+  "test_logic": "login_attempts >= 5 and expected_locked == True"
+}

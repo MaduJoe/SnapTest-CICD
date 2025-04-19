@@ -4,6 +4,22 @@ SnapTest는 테스트 케이스를 생성, 관리, 실행하고 결과를 실시
 
 ![GitHub Actions 워크플로우 상태](https://img.shields.io/badge/GitHub%20Actions-구성완료-brightgreen)
 
+## 🖼️ 스크린샷
+
+### 메인 화면 - 테스트 케이스 관리
+![메인 화면](demo-images/1.인덱스페이지.png)
+
+### 테스트 케이스 생성
+![테스트 케이스 수동 생성](demo-images/2.1수동생성.png) ![테스트 케이스 AI 자동 생성](demo-images/2.2자동생성.png)
+
+### 대시보드 및 시각화
+![대시보드 - 성공/실패 비율](demo-images/3.1대시보드-1.png) 
+![대시보드 - 테스트 케이스 통계](demo-images/3.2대시보드-2.png)
+![대시보드 - 테스트 리포트](demo-images/3.3대시보드-3.png)
+
+### CI/CD 통합
+![GitHub Actions 워크플로우](demo-images/4.CICD_Workflow.png)
+
 ## 🚀 주요 기능
 
 ### 📋 테스트 케이스 관리

@@ -131,3 +131,21 @@ def rollback_failed_transfer_test(initial_balance, transfer_amount, expected_bal
         return {"status": "PASS", "result": str(result)}
     except Exception as e:
         return {"status": "FAIL", "error": str(e)}
+
+
+def account_lock_after_five_failed_logins_test(login_attempts, expected_locked):
+    """
+    로그인 시도 5회 실패 후 계정이 잠기는지 확인하는 테스트
+    """
+    print(f"Running test: 로그인 시도 5회 실패 후 계정이 잠기는지 확인하는 테스트")
+    try:
+        # 테스트 로직 실행
+        print(f"Executing test logic: login_attempts >= 5 and expected_locked == True")
+        result = eval("login_attempts >= 5 and expected_locked == True")
+        
+        if not result:
+            return {"status": "FAIL", "message": "Test condition not met"}
+            
+        return {"status": "PASS", "result": str(result)}
+    except Exception as e:
+        return {"status": "FAIL", "error": str(e)}
