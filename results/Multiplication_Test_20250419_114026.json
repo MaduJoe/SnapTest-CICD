@@ -1,0 +1,19 @@
+{
+  "test_case": {
+    "name": "Multiplication Test",
+    "description": "4 * 5 = 20",
+    "test_function": "multiply_test",
+    "parameters": {
+      "a": 4,
+      "b": 5,
+      "expected": 20
+    }
+  },
+  "result": {
+    "status": "PASS",
+    "result": "20",
+    "error": ""
+  },
+  "execution_time": "0:00:00.000586",
+  "timestamp": "2025-04-19 11:40:26.716035"
+}

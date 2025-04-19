@@ -1,0 +1,10 @@
+{
+  "name": "Multiplication test with zero",
+  "description": "1\uacfc 0\uc744 \uacf1\ud558\uba74 0\uc774 \ub098\uc640\uc57c\ud55c\ub2e4.",
+  "test_function": "multiply_test",
+  "parameters": {
+    "a": 1,
+    "b": 0,
+    "expected": 0
+  }
+}

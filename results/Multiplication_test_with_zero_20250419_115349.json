@@ -1,0 +1,19 @@
+{
+  "test_case": {
+    "name": "Multiplication test with zero",
+    "description": "1과 0을 곱하면 0이 나와야한다.",
+    "test_function": "multiply_test",
+    "parameters": {
+      "a": "1",
+      "b": "0",
+      "expected": "0"
+    }
+  },
+  "result": {
+    "status": "PASS",
+    "result": "0",
+    "error": ""
+  },
+  "execution_time": "0.000696",
+  "timestamp": "2025-04-19 11:53:49.298487"
+}

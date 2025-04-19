@@ -1,0 +1,12 @@
+{
+  "test_case": "add 100 and 100",
+  "description": "Tests if 2 + 3 equals 5",
+  "status": "PASS",
+  "output": {
+    "result": 5,
+    "status": "PASS"
+  },
+  "log": "Adding 2 + 3\nResult: 5\n",
+  "timestamp": "2025-04-08T19:10:54.079178",
+  "duration": 3.009
+}

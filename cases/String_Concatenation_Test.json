@@ -1,0 +1,11 @@
+{
+    "name": "String Concatenation Test",
+    "description": "'Hello' + ' World' = 'Hello World'",
+    "test_function": "string_concat_test",
+    "parameters": {
+      "s1": "Hello",
+      "s2": " World",
+      "expected": "Hello World"
+    }
+  }
+  

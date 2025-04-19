@@ -1,0 +1,10 @@
+{
+  "name": "다른 기기 로그인 감지 SMS 알림",
+  "description": "다른 기기에서 로그인 시 SMS 알림이 정상적으로 전송되는지 확인합니다.",
+  "test_function": "sms_notification_test",
+  "parameters": {
+    "a": 1,
+    "b": 1,
+    "expected": 1
+  }
+}

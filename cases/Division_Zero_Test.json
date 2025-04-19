@@ -1,0 +1,10 @@
+{
+  "name": "Division Zero Test",
+  "description": "5 / 0 is invalid",
+  "test_function": "divide_zero_test",
+  "parameters": {
+    "a": 5,
+    "b": 0,
+    "expected": "ZeroDivisionError: division by zero"
+  }
+}

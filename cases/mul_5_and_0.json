@@ -1,0 +1,10 @@
+{
+  "name": "muliply positive_int and zero",
+  "description": "5 * 0",
+  "test_function": "multiply_test",
+  "parameters": {
+    "a": 5,
+    "b": 0,
+    "expected": 0
+  }
+}

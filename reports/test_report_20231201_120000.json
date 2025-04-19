@@ -1,0 +1,86 @@
+[
+  {
+    "test_case": {
+      "name": "덧셈 테스트",
+      "description": "두 숫자 덧셈을 테스트합니다",
+      "test_function": "add_test",
+      "filename": "addition_test.json",
+      "parameters": {
+        "a": 5,
+        "b": 3,
+        "expected": 8
+      }
+    },
+    "result": {
+      "status": "PASS",
+      "result": "8"
+    }
+  },
+  {
+    "test_case": {
+      "name": "곱셈 테스트",
+      "description": "두 숫자 곱셈을 테스트합니다",
+      "test_function": "multiply_test",
+      "filename": "multiplication_test.json",
+      "parameters": {
+        "a": 4,
+        "b": 5,
+        "expected": 20
+      }
+    },
+    "result": {
+      "status": "PASS",
+      "result": "20"
+    }
+  },
+  {
+    "test_case": {
+      "name": "나눗셈 테스트",
+      "description": "두 숫자 나눗셈을 테스트합니다",
+      "test_function": "divide_test",
+      "filename": "division_test.json",
+      "parameters": {
+        "a": 10,
+        "b": 2,
+        "expected": 5
+      }
+    },
+    "result": {
+      "status": "PASS",
+      "result": "5"
+    }
+  },
+  {
+    "test_case": {
+      "name": "문자열 연결 테스트",
+      "description": "두 문자열 연결을 테스트합니다",
+      "test_function": "string_concat_test",
+      "filename": "string_concat_test.json",
+      "parameters": {
+        "str1": "Hello, ",
+        "str2": "World!",
+        "expected": "Hello, World!"
+      }
+    },
+    "result": {
+      "status": "PASS",
+      "result": "Hello, World!"
+    }
+  },
+  {
+    "test_case": {
+      "name": "0으로 나누기 테스트",
+      "description": "0으로 나누기 예외 처리를 테스트합니다",
+      "test_function": "divide_zero_test",
+      "filename": "divide_by_zero_test.json",
+      "parameters": {
+        "a": 10,
+        "b": 0
+      }
+    },
+    "result": {
+      "status": "FAIL",
+      "error": "division by zero"
+    }
+  }
+] 

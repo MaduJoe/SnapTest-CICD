@@ -1,0 +1,12 @@
+{
+  "test_case": "mul 5 and 0",
+  "description": "5 * 0",
+  "status": "PASS",
+  "output": {
+    "result": 0,
+    "status": "PASS"
+  },
+  "log": "Multiplying 5 * 0\nResult: 0\n",
+  "timestamp": "2025-04-08T19:11:59.999891",
+  "duration": 0.003
+}

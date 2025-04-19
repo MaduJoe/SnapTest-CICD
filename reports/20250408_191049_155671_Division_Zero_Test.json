@@ -1,0 +1,12 @@
+{
+  "test_case": "Division Zero Test",
+  "description": "5 / 0 is invalid",
+  "status": "FAIL",
+  "output": {
+    "error": "division by zero",
+    "status": "FAIL"
+  },
+  "log": "",
+  "timestamp": "2025-04-08T19:10:49.145129",
+  "duration": 0.002
+}

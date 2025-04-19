@@ -1,0 +1,194 @@
+name: Test Automation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # 수동 실행 옵션
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Run test cases
+      run: |
+        python -c "
+        import os, json, sys
+        from datetime import datetime
+        sys.path.append('.')
+        
+        # 테스트 결과 디렉토리 생성
+        os.makedirs('reports', exist_ok=True)
+        
+        # 테스트 케이스 목록 로드
+        cases = []
+        if os.path.exists('cases'):
+            for filename in os.listdir('cases'):
+                if filename.endswith('.json'):
+                    try:
+                        with open(os.path.join('cases', filename), 'r', encoding='utf-8') as f:
+                            case = json.load(f)
+                            case['filename'] = filename
+                            cases.append(case)
+                    except Exception as e:
+                        print(f'Error reading file {filename}: {str(e)}')
+        
+        # 테스트 실행
+        from runner import run_test_case
+        
+        results = []
+        for case in cases:
+            print(f'Running test case: {case[\"name\"]}')
+            result = run_test_case(case['filename'])
+            results.append(result)
+            print(f'Test result: {result[\"result\"][\"status\"]}')
+        
+        # 결과 저장
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        report_file = f'reports/test_report_{timestamp}.json'
+        with open(report_file, 'w', encoding='utf-8') as f:
+            json.dump(results, f, indent=2, ensure_ascii=False)
+        
+        print(f'Test report saved to {report_file}')
+        
+        # 요약 출력
+        pass_count = sum(1 for r in results if r['result']['status'] == 'PASS')
+        fail_count = sum(1 for r in results if r['result']['status'] == 'FAIL')
+        total_count = len(results)
+        
+        print(f'\\nTest Summary:')
+        print(f'Total Tests: {total_count}')
+        print(f'Passed: {pass_count}')
+        print(f'Failed: {fail_count}')
+        print(f'Success Rate: {pass_count/total_count*100:.2f}% if total_count > 0 else \"N/A\"}')
+        
+        # 실패한 테스트가 있으면 종료 코드 1로 워크플로우 실패 표시
+        sys.exit(1 if fail_count > 0 else 0)
+        "
+    
+    - name: Upload test results
+      if: always()  # 테스트 실패해도 결과는 업로드
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: reports/
+        
+    - name: Generate HTML report
+      if: always()
+      run: |
+        python -c "
+        import os, json, sys
+        from datetime import datetime
+        sys.path.append('.')
+        
+        # 가장 최근 테스트 보고서 찾기
+        latest_report = None
+        if os.path.exists('reports'):
+            reports = [f for f in os.listdir('reports') if f.startswith('test_report_') and f.endswith('.json')]
+            if reports:
+                latest_report = sorted(reports, reverse=True)[0]
+        
+        if not latest_report:
+            print('No test reports found')
+            sys.exit(0)
+        
+        # HTML 보고서 생성
+        with open(os.path.join('reports', latest_report), 'r', encoding='utf-8') as f:
+            results = json.load(f)
+        
+        html = '''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Test Automation Report</title>
+            <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                .header { margin-bottom: 20px; }
+                .pass { color: green; }
+                .fail { color: red; }
+                .summary { margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 5px; }
+            </style>
+        </head>
+        <body>
+            <div class=\"container\">
+                <div class=\"header\">
+                    <h1>Test Automation Report</h1>
+                    <p>Generated on: %s</p>
+                </div>
+                
+                <div class=\"summary\">
+                    <h3>Summary</h3>
+                    <p>Total Tests: %d</p>
+                    <p>Passed: <span class=\"pass\">%d</span></p>
+                    <p>Failed: <span class=\"fail\">%d</span></p>
+                    <p>Success Rate: %.2f%%</p>
+                </div>
+                
+                <h3>Test Results</h3>
+                <table class=\"table table-striped\">
+                    <thead>
+                        <tr>
+                            <th>Test Case</th>
+                            <th>Function</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        ''' % (
+            datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            len(results),
+            sum(1 for r in results if r['result']['status'] == 'PASS'),
+            sum(1 for r in results if r['result']['status'] == 'FAIL'),
+            sum(1 for r in results if r['result']['status'] == 'PASS') / len(results) * 100 if results else 0
+        )
+        
+        for result in results:
+            status_class = 'pass' if result['result']['status'] == 'PASS' else 'fail'
+            html += f'''
+                <tr>
+                    <td>{result['test_case']['name']}</td>
+                    <td>{result['test_case']['test_function']}</td>
+                    <td class=\"{status_class}\">{result['result']['status']}</td>
+                    <td>{result['result'].get('result', '') or result['result'].get('error', '')}</td>
+                </tr>
+            '''
+        
+        html += '''
+                    </tbody>
+                </table>
+            </div>
+            <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js\"></script>
+        </body>
+        </html>
+        '''
+        
+        # HTML 파일 저장
+        html_report = os.path.join('reports', 'test_report.html')
+        with open(html_report, 'w', encoding='utf-8') as f:
+            f.write(html)
+        
+        print(f'HTML report generated: {html_report}')
+        "
+    
+    - name: Upload HTML report
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: html-report
+        path: reports/test_report.html 

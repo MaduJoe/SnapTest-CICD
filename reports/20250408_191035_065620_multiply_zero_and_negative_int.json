@@ -1,0 +1,12 @@
+{
+  "test_case": "multiply zero and negative int",
+  "description": "\uacf1\ud558\uae30\ud14c\uc2a4\ud2b8",
+  "status": "PASS",
+  "output": {
+    "result": 0,
+    "status": "PASS"
+  },
+  "log": "Multiplying 0 * -1\nResult: 0\n",
+  "timestamp": "2025-04-08T19:10:35.036811",
+  "duration": 0.001
+}

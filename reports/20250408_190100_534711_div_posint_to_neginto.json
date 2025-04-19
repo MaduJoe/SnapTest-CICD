@@ -1,0 +1,10 @@
+{
+  "test_case": "div posint to neginto",
+  "description": "ee",
+  "status": "FAIL",
+  "error": "Expected 5, got 0.6666666666666666",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\jkcho\\tossify-qa\\runner.py\", line 36, in run_test_case\n    result = test_func(**test_case[\"parameters\"])\n  File \"C:\\Users\\jkcho\\tossify-qa\\tests/functions.py\", line 23, in divide_test\n    assert abs(result - expected) < 1e-6, f\"Expected {expected}, got {result}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Expected 5, got 0.6666666666666666\n",
+  "log": "",
+  "timestamp": "2025-04-08T19:01:00.520739",
+  "duration": 0.003
+}

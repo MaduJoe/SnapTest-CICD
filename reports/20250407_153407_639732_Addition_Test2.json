@@ -1,0 +1,12 @@
+{
+  "test_case": "Addition Test2",
+  "description": "10 + 20 = 30 ",
+  "status": "PASS",
+  "output": {
+    "result": 30,
+    "status": "PASS"
+  },
+  "log": "Adding 10 + 20\nResult: 30\n",
+  "timestamp": "2025-04-07T15:34:07.615199",
+  "duration": 3.036
+}

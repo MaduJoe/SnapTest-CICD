@@ -1,0 +1,12 @@
+{
+  "test_case": "Multiplication test with zero",
+  "description": "1\uacfc 0\uc744 \uacf1\ud558\uba74 0\uc774 \ub098\uc640\uc57c\ud55c\ub2e4.",
+  "status": "PASS",
+  "output": {
+    "result": 0,
+    "status": "PASS"
+  },
+  "log": "Multiplying 1 * 0\nResult: 0\n",
+  "timestamp": "2025-04-09T03:10:20.948247",
+  "duration": 0.002
+}

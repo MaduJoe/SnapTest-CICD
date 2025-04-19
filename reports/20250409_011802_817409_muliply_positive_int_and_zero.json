@@ -1,0 +1,12 @@
+{
+  "test_case": "muliply positive_int and zero",
+  "description": "5 * 0",
+  "status": "PASS",
+  "output": {
+    "result": 0,
+    "status": "PASS"
+  },
+  "log": "Multiplying 5 * 0\nResult: 0\n",
+  "timestamp": "2025-04-09T01:18:02.779061",
+  "duration": 0.004
+}

@@ -1,0 +1,19 @@
+{
+  "test_case": {
+    "name": "Sample Addition Test",
+    "description": "Tests if 2 + 3 equals 5",
+    "test_function": "add_test",
+    "parameters": {
+      "a": 2,
+      "b": 3,
+      "expected": 5
+    }
+  },
+  "result": {
+    "status": "PASS",
+    "result": "5",
+    "error": ""
+  },
+  "execution_time": "0:00:03.001728",
+  "timestamp": "2025-04-19 11:40:16.061272"
+}

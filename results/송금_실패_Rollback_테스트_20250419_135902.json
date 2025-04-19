@@ -1,0 +1,20 @@
+{
+  "test_case": {
+    "name": "송금 실패 Rollback 테스트",
+    "description": "송금이 실패했을 때 계좌 잔액이 정상적으로 Rollback 되는지 확인하는 테스트",
+    "test_function": "rollback_failed_transfer_test",
+    "parameters": {
+      "initial_balance": "1000",
+      "transfer_amount": "500",
+      "expected_balance": "1000",
+      "transaction_status": "failed"
+    }
+  },
+  "result": {
+    "status": "FAIL",
+    "result": "",
+    "error": ""
+  },
+  "execution_time": "0.002277",
+  "timestamp": "2025-04-19 13:59:02.449684"
+}

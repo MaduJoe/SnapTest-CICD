@@ -1,0 +1,10 @@
+{
+  "name": "로그인 실패 3회 후 계정 잠금",
+  "description": "로그인 시도를 3회 실패하면 계정이 잠기는지 확인하는 테스트",
+  "test_function": "account_lock_test",
+  "parameters": {
+    "a": 3,
+    "b": null,
+    "expected": true
+  }
+}

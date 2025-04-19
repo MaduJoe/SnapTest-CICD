@@ -1,0 +1,19 @@
+{
+  "test_case": {
+    "name": "muliply positive_int and zero",
+    "description": "5 * 0",
+    "test_function": "multiply_test",
+    "parameters": {
+      "a": 5,
+      "b": 0,
+      "expected": 0
+    }
+  },
+  "result": {
+    "status": "PASS",
+    "result": "0",
+    "error": ""
+  },
+  "execution_time": "0:00:00.000437",
+  "timestamp": "2025-04-19 11:43:18.594392"
+}

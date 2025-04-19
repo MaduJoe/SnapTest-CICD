@@ -1,0 +1,10 @@
+{
+  "test_case": "\ube44\ubc00\ubc88\ud638_\ubcf5\uc7a1\ub3c4_\ud14c\uc2a4\ud2b8",
+  "description": "Execution Failed",
+  "status": "FAIL",
+  "error": "'cp949' codec can't decode byte 0xb0 in position 18: illegal multibyte sequence",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\jkcho\\SnapTest\\runner.py\", line 33, in run_test_case\n    test_case = json.load(f)\n  File \"C:\\Python313\\Lib\\json\\__init__.py\", line 293, in load\n    return loads(fp.read(),\n                 ~~~~~~~^^\nUnicodeDecodeError: 'cp949' codec can't decode byte 0xb0 in position 18: illegal multibyte sequence\n",
+  "log": "",
+  "timestamp": "2025-04-19T11:38:08.070305",
+  "duration": 0.0
+}

@@ -1,0 +1,19 @@
+{
+  "test_case": {
+    "name": "Division Zero Test",
+    "description": "5 / 0 is invalid",
+    "test_function": "divide_zero_test",
+    "parameters": {
+      "a": "5",
+      "b": "0",
+      "expected": "ZeroDivisionError: division by zero"
+    }
+  },
+  "result": {
+    "status": "FAIL",
+    "result": "",
+    "error": "division by zero"
+  },
+  "execution_time": "0:00:00.000526",
+  "timestamp": "2025-04-19 11:50:25.897881"
+}

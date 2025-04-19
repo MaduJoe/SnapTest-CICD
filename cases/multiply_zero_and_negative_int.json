@@ -1,0 +1,10 @@
+{
+  "name": "multiply zero and negative int",
+  "description": "\uacf1\ud558\uae30\ud14c\uc2a4\ud2b8",
+  "test_function": "multiply_test",
+  "parameters": {
+    "a": 0,
+    "b": -1,
+    "expected": 0
+  }
+}

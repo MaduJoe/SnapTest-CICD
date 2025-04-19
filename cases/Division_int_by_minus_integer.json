@@ -1,0 +1,10 @@
+{
+  "name": "Division int by minus integer",
+  "description": "testtt",
+  "test_function": "divide_test",
+  "parameters": {
+    "a": 2,
+    "b": -1,
+    "expected": "error"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "test_case": {
+    "name": "Division int by minus integer",
+    "description": "testtt",
+    "test_function": "divide_test",
+    "parameters": {
+      "a": "2",
+      "b": "-1",
+      "expected": "error"
+    }
+  },
+  "result": {
+    "status": "FAIL",
+    "error": "unsupported operand type(s) for -: 'float' and 'str'",
+    "result": ""
+  },
+  "execution_time": "0:00:00.000863",
+  "timestamp": "2025-04-19 11:50:25.879261"
+}

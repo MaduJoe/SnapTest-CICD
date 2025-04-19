@@ -1,0 +1,12 @@
+{
+  "test_case": "Failure Test",
+  "description": "This test should fail intentionally",
+  "status": "FAIL",
+  "output": {
+    "result": "This test should fail.",
+    "status": "FAIL"
+  },
+  "log": "This test should fail.\n",
+  "timestamp": "2025-04-08T19:11:01.566677",
+  "duration": 0.002
+}

@@ -1,0 +1,12 @@
+{
+  "test_case": "Multiplication Test",
+  "description": "4 * 5 = 20",
+  "status": "PASS",
+  "output": {
+    "result": 20,
+    "status": "PASS"
+  },
+  "log": "Multiplying 4 * 5\nResult: 20\n",
+  "timestamp": "2025-04-08T19:10:55.746087",
+  "duration": 0.002
+}

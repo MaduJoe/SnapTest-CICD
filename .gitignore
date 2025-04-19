@@ -1,4 +1,9 @@
+# 무시할 디렉토리
 scripts/
+tmp/
+temp/
+
+# 무시할 파일 유형
 *.pdf
 *.docx
 *.doc
@@ -6,37 +11,64 @@ scripts/
 *.xlsx
 *.ppt
 *.pptx
-*.txt
 *.csv
-*.json
-*.xml
-*.yaml
-*.yml
-*.db
 
-# Environment variables
+# GitHub Actions 워크플로우 파일과 테스트 관련 JSON 파일은 제외하지 않음
+# *.json  <- 삭제
+# *.yaml  <- 삭제
+# *.yml   <- 삭제
+# reports/ <- 삭제
+
+# 환경 변수
 .env
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Virtual Environment
+# 가상 환경
 venv/
 env/
 ENV/
+.venv/
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+.DS_Store
 
-# Database
+# 데이터베이스
 *.db
 *.sqlite3
 
-# Logs
+# 로그
 *.log
+logs/
 
-# Test reports
-reports/
+# 운영체제 파일
+.DS_Store
+Thumbs.db
+
+# 개인 설정 파일
+config.personal.js
+credentials.json

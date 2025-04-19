@@ -1,0 +1,7 @@
+{
+    "name": "Failure Test",
+    "description": "This test should fail intentionally",
+    "test_function": "fail_test",
+    "parameters": {}
+  }
+  

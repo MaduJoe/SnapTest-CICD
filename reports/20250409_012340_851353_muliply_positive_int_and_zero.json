@@ -1,0 +1,10 @@
+{
+  "test_case": "muliply_positive_int_and_zero",
+  "description": "Execution Failed",
+  "status": "FAIL",
+  "error": "cases\\muliply_positive_int_and_zero.json \ud30c\uc77c\uc774 \uc874\uc7ac\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\jkcho\\tossify-qa\\runner.py\", line 30, in run_test_case\n    raise FileNotFoundError(f\"{filepath} \ud30c\uc77c\uc774 \uc874\uc7ac\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.\")\nFileNotFoundError: cases\\muliply_positive_int_and_zero.json \ud30c\uc77c\uc774 \uc874\uc7ac\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.\n",
+  "log": "",
+  "timestamp": "2025-04-09T01:23:40.830203",
+  "duration": 0.0
+}

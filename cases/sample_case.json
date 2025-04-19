@@ -1,0 +1,11 @@
+{
+    "name": "Sample Addition Test",
+    "description": "Tests if 2 + 3 equals 5",
+    "test_function": "add_test",
+    "parameters": {
+      "a": 2,
+      "b": 3,
+      "expected": 5
+    }
+  }
+  
