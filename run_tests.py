@@ -4,6 +4,11 @@ import sys
 from datetime import datetime
 import importlib
 import xml.etree.ElementTree as ET
+import requests
+from flask import Flask, render_template
+
+token = os.environ.get("GITHUB_TOKEN", "")
+headers = {"Authorization": f"token {token}"} if token else {}
 
 def run_test_case(filename):
     """테스트 케이스 파일을 실행하고 결과를 반환합니다."""
@@ -196,5 +201,49 @@ def generate_html_report(results):
 
     print(f'HTML report generated: {html_report}')
 
+app = Flask(__name__)
+
+@app.route('/ci_reports')
+def ci_reports():
+    # GitHub API를 통해 워크플로우 실행 결과 가져오기
+    repo = "MaduJoe/SnapTest-CICD"  # 적절히 변경
+    token = os.environ.get("GITHUB_TOKEN", "")
+    
+    url = f"https://api.github.com/repos/{repo}/actions/runs"
+    headers = {"Authorization": f"token {token}"} if token else {}
+    
+    print(f"Fetching workflow runs from: {url}")
+    print(f"Using authentication: {'Yes' if token else 'No'}")
+    
+    response = requests.get(url, headers=headers)
+    print(f"API Response status: {response.status_code}")
+    
+    if response.status_code == 200:
+        data = response.json()
+        print(f"Total workflow runs found: {len(data.get('workflow_runs', []))}")
+        workflows = data.get("workflow_runs", [])
+        
+        # 디버깅을 위해 첫 번째 워크플로우 실행의 일부 정보 출력
+        if workflows:
+            first_run = workflows[0]
+            print(f"First workflow: {first_run.get('name')} (ID: {first_run.get('id')})")
+            print(f"Status: {first_run.get('status')}, Conclusion: {first_run.get('conclusion')}")
+        
+        return render_template('ci_reports.html', workflows=workflows)
+    else:
+        error_msg = f"Error fetching data: {response.status_code}"
+        if response.status_code == 401:
+            error_msg += " - Authorization failed. Check your token."
+        elif response.status_code == 404:
+            error_msg += f" - Repository '{repo}' not found or you don't have access."
+        
+        print(error_msg)
+        try:
+            print(f"Error response: {response.json()}")
+        except:
+            print("Could not parse error response as JSON")
+            
+        return error_msg, 500
+
 if __name__ == '__main__':
-    main() 
+    app.run(debug=True) 
