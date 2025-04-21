@@ -1,4 +1,5 @@
 # 📊 SnapTest: GitHub Actions 기반 QA 자동화 통합 플랫폼
+![GitHub Actions 워크플로우 상태](https://img.shields.io/badge/GitHub%20Actions-구성완료-brightgreen)
 
 이 프로젝트는 **Flask 기반의 QA 테스트 자동화 플랫폼**으로, **테스트 케이스 관리 기능과 CI/CD 파이프라인**을 통합하여 테스트 프로세스를 자동화합니다.
 
@@ -13,7 +14,6 @@
 
 > 🚀 테스트의 설계부터 실행, 리포트까지 하나의 플랫폼에서 자동화하여 **QA 업무의 생산성과 가시성을 극대화**합니다.
 
-![GitHub Actions 워크플로우 상태](https://img.shields.io/badge/GitHub%20Actions-구성완료-brightgreen)
 
 ---
 
