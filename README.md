@@ -1,7 +1,8 @@
-# 📊 SnapTest: QA 테스트 자동화 플랫폼
+# 📊 SnapTest: GitHub Actions 기반 QA 자동화 통합 플랫폼
 
 SnapTest는 테스트 케이스를 생성, 관리, 실행하고 결과를 실시간으로 시각화할 수 있는 종합적인 QA 테스트 자동화 플랫폼입니다.  
-사용자 친화적인 웹 인터페이스와 강력한 백엔드 시스템을 통해 테스트 자동화 프로세스를 간소화하고, 실시간 피드백을 제공합니다.
+단순 테스트 실행을 넘어, 테스트케이스 관리와 결과 분석을 통합하여 QA 업무의 생산성과 신뢰도 향상을 목표로 합니다.
+모든 워크플로우는 GitHub에서 자동 트리거되며, 결과 리포트는 메일, GitHub 리포지토리 등에 연동 가능합니다.
 
 ![GitHub Actions 워크플로우 상태](https://img.shields.io/badge/GitHub%20Actions-구성완료-brightgreen)
 
