@@ -282,19 +282,8 @@ SnapTest 개발에 기여하고 싶으시다면:
 
 ---
 
-## 📜 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
-
----
-
 ## 📬 연락처
 
-**재근 조**  
-🔗 [GitHub](https://github.com/yourusername)  
+**조재근**  
 📧 jaekeunv@gmail.com  
-📁 프로젝트 링크: [github.com/yourusername/snaptest](https://github.com/yourusername/snaptest)
-
 ---
-
-© 2024 재근 조 (jaekeunv@gmail.com)
